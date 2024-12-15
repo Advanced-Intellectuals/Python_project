@@ -1,6 +1,6 @@
 from db import Base
 from sqlalchemy.orm import Mapped, mapped_column
-from sqlalchemy import select, ARRAY, String, Integer
+from sqlalchemy import ARRAY, String, Integer
 
 
 class User(Base):
@@ -26,3 +26,16 @@ class Movie(Base):
 
     def __repr__(self) -> str:
         return f"<Movie {self.movie_id} {self.name} {self.genres} {self.year}>"
+
+
+class Score(Base):
+    __tablename__ = 'scores'
+
+    user_id: Mapped[int] = mapped_column(
+        Integer, nullable=False, primary_key=True)
+    movie_id: Mapped[int] = mapped_column(
+        Integer, nullable=False, primary_key=True)
+    score: Mapped[int] = mapped_column(Integer, nullable=False)
+
+    def __repr__(self) -> str:
+        return f"<Score {self.user_id} {self.movie_id} {self.score}>"
