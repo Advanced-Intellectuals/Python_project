@@ -1,6 +1,7 @@
 from models import Score
 from db import async_session
 from sqlalchemy import select
+from sqlalchemy.orm import joinedload
 
 
 class ScoreRepo():
@@ -8,7 +9,9 @@ class ScoreRepo():
 
     async def get_all(self):
         async with self.__async_session() as session:
-            statement = select(Score)
-
+            statement = select(Score).options(joinedload(
+                Score.user), joinedload(Score.movie))
             result = await session.execute(statement)
-            return result.scalars()
+
+            scores = result.unique().scalars().all()
+            return scores
