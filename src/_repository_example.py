@@ -1,5 +1,5 @@
 from repository.scores import ScoreRepo
-from repository.users import UserRepo
+from repository.users import UserRepo, User
 from repository.movies import MovieRepo
 import asyncio
 
@@ -9,6 +9,7 @@ async def main():
     movie_repo = MovieRepo()
     score_repo = ScoreRepo()
 
+    # Examples of getting whole tables
     users = await user_repo.get_all()
     print('Users:')
     for u in users:
@@ -26,6 +27,16 @@ async def main():
     for s in scores:
         print(s.user, s.movie, s.score)
     print('\n')
+
+    # Example of recieving a user by login
+    user = await user_repo.get_by_login('tsalikhov')
+    print(user.password_hash)
+
+    # Example of adding a user to database
+    user = User(login='eepifanov', password_hash='123',
+                first_name='Eugene', email='epif@mai.ru')
+
+    await user_repo.write(user)
 
 
 asyncio.run(main())
