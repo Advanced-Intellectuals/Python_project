@@ -20,7 +20,7 @@ CREATE TABLE "scores"(
         ON DELETE CASCADE,
     "movie_id" BIGINT NOT NULL REFERENCES "movies"("movie_id")
         ON DELETE CASCADE,
-    "score" BIGINT NOT NULL
+    "score" DOUBLE PRECISION NOT NULL
 );
 
 CREATE TABLE "watched"(

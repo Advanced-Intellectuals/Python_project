@@ -1,17 +1,24 @@
 from db import Base
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy import ARRAY, String, BigInteger, ForeignKey, Column, Table
+from sqlalchemy import ARRAY, String, BigInteger, ForeignKey, Column, Table, Double
 from sqlalchemy.dialects.postgresql import UUID
 
 watched_table = Table(
     'watched',
     Base.metadata,
+    Column(
+        'user_id',
+        BigInteger,
+        ForeignKey('users.user_id', ondelete='CASCADE'),
+        primary_key=True
+    ),
 
-    Column('user_id', BigInteger, ForeignKey(
-        'users.user_id', ondelete='CASCADE'), primary_key=True),
-
-    Column('movie_id', BigInteger, ForeignKey(
-        'movies.movie_id', ondelete='CASCADE'), primary_key=True)
+    Column(
+        'movie_id',
+        BigInteger,
+        ForeignKey('movies.movie_id', ondelete='CASCADE'),
+        primary_key=True
+    )
 )
 
 
@@ -68,11 +75,19 @@ class Score(Base):
     __tablename__ = 'scores'
 
     user_id: Mapped[int] = mapped_column(
-        BigInteger, ForeignKey('users.user_id'), nullable=False, primary_key=True)
+        BigInteger, ForeignKey('users.user_id'),
+        nullable=False,
+        primary_key=True
+    )
+
     movie_id: Mapped[int] = mapped_column(
-        BigInteger, ForeignKey('movies.movie_id'), nullable=False, primary_key=True)
-    score: Mapped[int] = mapped_column(
-        BigInteger, nullable=False)
+        BigInteger,
+        ForeignKey('movies.movie_id'),
+        nullable=False,
+        primary_key=True
+    )
+
+    score: Mapped[float] = mapped_column(Double, nullable=False)
 
     user = relationship('User', back_populates='scores')
     movie = relationship('Movie', back_populates='scores')

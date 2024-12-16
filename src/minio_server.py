@@ -21,20 +21,31 @@ class MinioServer():
         if not found:
             self.__minio_client.make_bucket(self.__bucket_name)
 
-    def get_file(self, file_name: str, dest_name: str):
-        status = self.__minio_client.fget_object(
-            self.__bucket_name, file_name, dest_name
-        )
+    def get_file(self, file_name: str, dest_path: str) -> bool:
+        try:
+            self.__minio_client.fget_object(
+                self.__bucket_name, file_name, dest_path
+            )
+            return True
+        except Exception:
+            return False
 
-        return status
+    def put_file(self, source_path: str, file_name: str):
+        try:
+            self.__minio_client.fput_object(
+                self.__bucket_name, file_name, source_path
+            )
+            return True
+        except Exception:
+            return False
 
 
 def main():
     minio_server = MinioServer()
-    print('I am here')
-    print(minio_server.get_file(
-        "2024-12-01 01.40.30.jpg", "./2024-12-01 01.40.30.jpg")
-    )
+    status = minio_server.put_file("./2024-12-01 01.40.30.jpg",
+                                   "2024-12-01 01.40.30.jpg")
+
+    print(status)
 
 
 main()
