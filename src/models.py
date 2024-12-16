@@ -1,6 +1,7 @@
 from db import Base
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import ARRAY, String, BigInteger, ForeignKey, Column, Table
+from sqlalchemy.dialects.postgresql import UUID
 
 watched_table = Table(
     'watched',
@@ -45,6 +46,8 @@ class Movie(Base):
     name: Mapped[str] = mapped_column(String, nullable=False)
     genres: Mapped[list[str]] = mapped_column(ARRAY(String), nullable=False)
     year: Mapped[int] = mapped_column(BigInteger, nullable=False)
+    preview: Mapped[str] = mapped_column(UUID(as_uuid=True), nullable=False)
+    file: Mapped[str] = mapped_column(UUID(as_uuid=True), nullable=False)
 
     scores = relationship(
         'Score', back_populates='movie',

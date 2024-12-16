@@ -10,7 +10,9 @@ CREATE TABLE "movies"(
     "movie_id" SERIAL NOT NULL PRIMARY KEY,
     "name" VARCHAR(255) NOT NULL,
     "genres" VARCHAR(255) ARRAY[10] NOT NULL,
-    "year" BIGINT NOT NULL
+    "year" BIGINT NOT NULL,
+    "preview" UUID NOT NUll,
+    "file" UUID NOT NULL
 );
 
 CREATE TABLE "scores"(

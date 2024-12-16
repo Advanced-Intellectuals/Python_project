@@ -18,7 +18,7 @@ async def main():
     movies = await movie_repo.get_all()
     print('Movies:')
     for m in movies:
-        print(m.movie_id, m.name, m.watched_by, m.scores)
+        print(m.movie_id, m.name, m.preview, m.file, m.watched_by, m.scores)
     print('\n')
 
     scores = await score_repo.get_all()
