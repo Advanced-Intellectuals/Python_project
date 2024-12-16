@@ -10,7 +10,9 @@ CREATE TABLE "movies"(
     "movie_id" SERIAL NOT NULL PRIMARY KEY,
     "name" VARCHAR(255) NOT NULL,
     "genres" VARCHAR(255) ARRAY[10] NOT NULL,
-    "year" BIGINT NOT NULL
+    "year" BIGINT NOT NULL,
+    "preview" UUID NOT NUll,
+    "file" UUID NOT NULL
 );
 
 CREATE TABLE "scores"(
@@ -18,7 +20,7 @@ CREATE TABLE "scores"(
         ON DELETE CASCADE,
     "movie_id" BIGINT NOT NULL REFERENCES "movies"("movie_id")
         ON DELETE CASCADE,
-    "score" BIGINT NOT NULL
+    "score" DOUBLE PRECISION NOT NULL
 );
 
 CREATE TABLE "watched"(

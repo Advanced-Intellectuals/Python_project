@@ -14,4 +14,8 @@ class MovieRepo():
             result = await session.execute(statement)
 
             movies = result.unique().scalars().all()
+
+            for m in movies:
+                m.preview = str(m.preview)
+                m.file = str(m.file)
             return movies
