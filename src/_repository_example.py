@@ -1,6 +1,6 @@
 from repository.scores import ScoreRepo
 from repository.users import UserRepo, User
-from repository.movies import MovieRepo
+from repository.movies import MovieRepo, Movie
 import asyncio
 
 
@@ -37,6 +37,21 @@ async def main():
                 first_name='Eugene', email='epif@mai.ru')
 
     await user_repo.write(user)
+
+    # Example of deleting user by login
+    await user_repo.delete('eepifanov')
+
+    # Example of movie lookup
+    movie = await movie_repo.get_by_id(1)
+    print(movie)
+
+    # Example of adding movie
+    movie = Movie(name='Avengers: Endgame', year=2019, genres=[
+                  'action', 'drama'], preview='acde070d-8c4c-4f0d-9d8a-162843c10333', file='acde070d-8c4c-4f0d-9d8a-162843c10333')
+    await movie_repo.write(movie)
+
+    # Example of deleting a movie
+    await movie_repo.delete(2)
 
 
 asyncio.run(main())

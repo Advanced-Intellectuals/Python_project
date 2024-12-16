@@ -1,4 +1,4 @@
-from sqlalchemy import select
+from sqlalchemy import select, delete
 from sqlalchemy.orm import joinedload
 from models import User
 from db import async_session
@@ -29,4 +29,16 @@ class UserRepo():
     async def write(self, user: User):
         async with self.__async_session() as session:
             session.add(user)
+            await session.commit()
+
+    async def delete(self, login: User):
+        async with self.__async_session() as session:
+            statement = select(User).options(
+                joinedload(User.watched_movies),
+                joinedload(User.scores)).where(User.login == login)
+            result = await session.execute(statement)
+
+            user = result.scalars().first()
+            await session.delete(user)
+
             await session.commit()
