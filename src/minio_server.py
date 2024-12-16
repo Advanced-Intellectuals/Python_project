@@ -30,7 +30,7 @@ class MinioServer():
         except Exception:
             return False
 
-    def put_file(self, source_path: str, file_name: str):
+    def put_file(self, source_path: str, file_name: str) -> bool:
         try:
             self.__minio_client.fput_object(
                 self.__bucket_name, file_name, source_path
