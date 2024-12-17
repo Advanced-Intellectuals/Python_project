@@ -36,7 +36,7 @@ async def main():
     user = User(login='eepifanov', password_hash='123',
                 first_name='Eugene', email='epif@mai.ru')
 
-    await user_repo.write(user)
+    await user_repo.add(user)
 
     # Example of deleting user by login
     await user_repo.delete('eepifanov')
@@ -48,10 +48,16 @@ async def main():
     # Example of adding movie
     movie = Movie(name='Avengers: Endgame', year=2019, genres=[
                   'action', 'drama'], preview='acde070d-8c4c-4f0d-9d8a-162843c10333', file='acde070d-8c4c-4f0d-9d8a-162843c10333')
-    await movie_repo.write(movie)
+    await movie_repo.add(movie)
 
     # Example of deleting a movie
-    await movie_repo.delete(2)
+    # await movie_repo.delete(2)
+
+    # Example of marking a movie as watched for user
+    await user_repo.add_watched(14, 1)
+
+    # Example of adding a score from user to movie
+    await score_repo.add_score(14, 1, 4.5)
 
 
 asyncio.run(main())

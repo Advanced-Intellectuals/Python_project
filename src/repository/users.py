@@ -1,6 +1,6 @@
-from sqlalchemy import select, delete
+from sqlalchemy import select, insert
 from sqlalchemy.orm import joinedload
-from models import User
+from models import User, Movie, watched_table
 from db import async_session
 
 
@@ -26,7 +26,7 @@ class UserRepo():
             user = result.scalars().first()
             return user
 
-    async def write(self, user: User):
+    async def add(self, user: User):
         async with self.__async_session() as session:
             session.add(user)
             await session.commit()
@@ -42,3 +42,18 @@ class UserRepo():
             await session.delete(user)
 
             await session.commit()
+
+    async def add_watched(self, user_id: int, movie_id: int) -> bool:
+        async with self.__async_session() as session:
+            user = await session.get(User, user_id)
+            movie = await session.get(Movie, movie_id)
+
+            if not user or not movie:
+                return False
+
+            statement = insert(watched_table).values(
+                user_id=user_id, movie_id=movie_id)
+            await session.execute(statement)
+            await session.commit()
+
+            return True

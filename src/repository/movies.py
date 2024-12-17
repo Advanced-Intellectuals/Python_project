@@ -33,7 +33,7 @@ class MovieRepo():
 
             return movie
 
-    async def write(self, movie: Movie):
+    async def add(self, movie: Movie):
         async with self.__async_session() as session:
             session.add(movie)
             await session.commit()
