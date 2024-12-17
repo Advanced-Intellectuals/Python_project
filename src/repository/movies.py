@@ -19,3 +19,33 @@ class MovieRepo():
                 m.preview = str(m.preview)
                 m.file = str(m.file)
             return movies
+
+    async def get_by_id(self, id: int):
+        async with self.__async_session() as session:
+            statement = select(Movie).options(joinedload(
+                Movie.watched_by), joinedload(Movie.scores)).where(Movie.movie_id == id)
+
+            result = await session.execute(statement)
+
+            movie = result.scalars().first()
+            movie.preview = str(movie.preview)
+            movie.file = str(movie.file)
+
+            return movie
+
+    async def add(self, movie: Movie):
+        async with self.__async_session() as session:
+            session.add(movie)
+            await session.commit()
+
+    async def delete(self, id: int):
+        async with self.__async_session() as session:
+            statement = select(Movie).options(joinedload(
+                Movie.watched_by), joinedload(Movie.scores)).where(Movie.movie_id == id)
+
+            result = await session.execute(statement)
+
+            movie = result.scalars().first()
+            await session.delete(movie)
+
+            await session.commit()

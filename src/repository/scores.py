@@ -1,6 +1,6 @@
-from models import Score
+from models import Score, User, Movie
 from db import async_session
-from sqlalchemy import select
+from sqlalchemy import select, insert
 from sqlalchemy.orm import joinedload
 
 
@@ -15,3 +15,19 @@ class ScoreRepo():
 
             scores = result.unique().scalars().all()
             return scores
+
+    async def add_score(self, user_id: int, movie_id: int, score: float) -> bool:
+        async with self.__async_session() as session:
+            user = await session.get(User, user_id)
+            movie = await session.get(Movie, movie_id)
+
+            if not user or not movie:
+                return False
+
+            statement = insert(Score).values(
+                user_id=user_id, movie_id=movie_id, score=score
+            )
+            await session.execute(statement)
+            await session.commit()
+
+            return True
