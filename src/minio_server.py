@@ -1,6 +1,8 @@
 from minio import Minio
 import os
 from dotenv import load_dotenv
+from io import BytesIO
+from datetime import timedelta
 
 load_dotenv()
 
@@ -39,15 +41,16 @@ class MinioServer():
         except Exception:
             return False
 
+    def get_video_url(self, video_id):
+        return self.__minio_client.presigned_get_object(
+            self.__bucket_name, video_id, expires=timedelta(hours=3))
+
 
 def main():
     minio_server = MinioServer()
-    data = minio_server.get_file("2024-12-01 01.40.30.jpg")
+    data = minio_server.get_video_url("2024-12-01 01.40.30.jpg")
 
-    if data:
-        print(data.data)
-    else:
-        print(data)
+    print(data)
 
 
 main()
