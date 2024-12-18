@@ -23,15 +23,6 @@ class MinioServer():
         if not found:
             self.__minio_client.make_bucket(self.__bucket_name)
 
-    def get_file(self, file_id: str):
-        try:
-            response = self.__minio_client.get_object(
-                self.__bucket_name, file_id
-            )
-            return response
-        except Exception:
-            return None
-
     def put_file(self, source_path: str, file_id: str) -> bool:
         try:
             self.__minio_client.fput_object(
@@ -41,16 +32,6 @@ class MinioServer():
         except Exception:
             return False
 
-    def get_video_url(self, video_id):
+    def get_object_url(self, object_id):
         return self.__minio_client.presigned_get_object(
-            self.__bucket_name, video_id, expires=timedelta(hours=3))
-
-
-def main():
-    minio_server = MinioServer()
-    data = minio_server.get_video_url("2024-12-01 01.40.30.jpg")
-
-    print(data)
-
-
-main()
+            self.__bucket_name, object_id, expires=timedelta(hours=3))
