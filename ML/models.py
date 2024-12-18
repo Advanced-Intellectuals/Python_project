@@ -3,7 +3,6 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import String, BigInteger, ForeignKey, Column, Table, Double
 from sqlalchemy.dialects.postgresql import UUID, ARRAY
 from pydantic import BaseModel
-from typing import Optional
 
 watched_table = Table(
     'watched',
@@ -96,21 +95,3 @@ class Score(Base):
 
     def __repr__(self) -> str:
         return f"<Score {self.user_id} {self.movie_id} {self.score}>"
-
-
-class LoginRequest(BaseModel):
-    user_login: str
-    user_password: str
-
-
-class RegisterRequest(BaseModel):
-    register_login: str
-    register_password_hash: str
-    register_first_name: str
-    register_email: str
-
-class MainMoviesRequest(BaseModel):
-    page_number: int
-    start_year: Optional[int] = None
-    end_year: Optional[int] = None
-    genres: Optional[list[str]] = None
