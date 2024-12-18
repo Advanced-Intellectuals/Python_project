@@ -6,10 +6,10 @@ import os
 from dotenv import load_dotenv
 
 from services.user import UserService
-from models import LoginRequest, RegisterRequest
+from services.movie import MovieService
+from models import LoginRequest, RegisterRequest, MainMoviesRequest
 
-
-load_dotenv
+load_dotenv()
 
 
 class Serializer():
@@ -34,12 +34,13 @@ class App():
     __app: FastAPI
     __serializer: Serializer
 
-    def __init__(self, user_service: UserService):
-        __app = FastAPI()
-        __serializer = Serializer()
+    def __init__(self, user_service: UserService, movie_service: MovieService):
+        self.__app = FastAPI()
+        self.__serializer = Serializer()
 
-        @__app.post("/login")
+        @self.__app.post("/login")
         async def login(request: Request, response: Response, data: LoginRequest):
+
             user_login = data.user_login
             user_password = data.user_password
 
@@ -50,7 +51,7 @@ class App():
 
             if user_id:
                 # создание сессии
-                session_cookie = __serializer.create_session(user_id)
+                session_cookie = self.__serializer.create_session(user_id)
                 response.set_cookie(
                     key="session",
                     value=session_cookie,
@@ -65,7 +66,7 @@ class App():
 
         # тестим (или рефакторим или не используем)
 
-        @__app.get("/login")
+        @self.__app.get("/login")
         async def login(request: Request, response: Response):
             session_cookie = request.cookies.get(
                 "session")  # Извлекаем куку из запроса
@@ -74,7 +75,7 @@ class App():
                 raise HTTPException(
                     status_code=401, detail="No session cookie found.")
 
-            user_id = __serializer.get_user_id_from_session(
+            user_id = self.__serializer.get_user_id_from_session(
                 session_cookie)  # Извлекаем user_id из куки
             if user_id is None:
                 raise HTTPException(
@@ -82,7 +83,7 @@ class App():
 
             return {"user_id": user_id}  # Возвращаем user_id в ответе
 
-        @__app.post("/register")
+        @self.__app.post("/register")
         async def register(request: Request, response: Response, data: RegisterRequest):
 
             user_login = data.register_login
@@ -97,7 +98,7 @@ class App():
 
             if new_user:
                 # создание сессии
-                session_cookie = __serializer.create_session(new_user)
+                session_cookie = self.__serializer.create_session(new_user)
                 response.set_cookie(
                     key="session",
                     value=session_cookie,
@@ -109,6 +110,22 @@ class App():
             else:
                 raise HTTPException(
                     status_code=401, detail="Invalid password.")
+
+        @self.__app.get("/movies")
+        async def main_movies(request: Request, response: Response, data: MainMoviesRequest):
+
+            page_number = data.page_number
+            page_size = 15
+            start_year = data.start_year
+            end_year = data.end_year
+            genres = data.genres
+
+            try:
+                movies = await movie_service.main_movies(page_number, page_size, start_year, end_year, genres)
+            except Exception as e:
+                raise e
+
+            return {"movies": movies}
 
     def get_app(self):
         return self.__app
