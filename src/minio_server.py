@@ -1,7 +1,6 @@
 from minio import Minio
 import os
 from dotenv import load_dotenv
-from io import BytesIO
 from datetime import timedelta
 
 load_dotenv()

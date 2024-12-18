@@ -1,7 +1,7 @@
 from db import Base
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy import ARRAY, String, BigInteger, ForeignKey, Column, Table, Double
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy import String, BigInteger, ForeignKey, Column, Table, Double
+from sqlalchemy.dialects.postgresql import UUID, ARRAY
 
 watched_table = Table(
     'watched',
