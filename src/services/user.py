@@ -2,7 +2,6 @@ from fastapi import HTTPException
 from repository.users import UserRepo, User
 from password_hasher import PasswordHasher
 
-
 class UserService:
     def __init__(self, user_repo: UserRepo, hasher: PasswordHasher):
         self.user_repo = user_repo
