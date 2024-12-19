@@ -16,3 +16,8 @@ class MovieService:
                    "preview": movie.preview} for movie in movies]
 
         return movies
+
+    async def search_movies(self, searched_title):
+        movies = await self.movie_repo.find(searched_title)
+
+        return movies
