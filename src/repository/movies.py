@@ -64,7 +64,7 @@ class MovieRepo():
             statement = select(Movie).options(joinedload(
                 Movie.watched_by), joinedload(Movie.scores)).where(Movie.name.like(search))
 
-            result = await session.execute(statement)
+            result = await session.execute(statement.limit(20))
             movies = result.unique().scalars().all()
 
             return movies
