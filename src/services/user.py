@@ -33,3 +33,14 @@ class UserService:
 
             await self.user_repo.add(user)
             return user.user_id
+
+    async def watched(self, user_id):
+        current_user = await self.user_repo.get_by_id(user_id)
+
+        if current_user is None:
+            raise HTTPException(
+                status_code=401, detail="A user with this id does not exist.")
+        else:
+            movies = current_user.watched_movies
+
+        return movies
