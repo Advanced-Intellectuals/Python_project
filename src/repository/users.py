@@ -26,6 +26,16 @@ class UserRepo():
             user = result.scalars().first()
             return user
 
+    async def get_by_id(self, user_id: int):
+        async with self.__async_session() as session:
+            statement = select(User).options(
+                joinedload(User.watched_movies),
+                joinedload(User.scores)).where(User.user_id == user_id)
+            result = await session.execute(statement)
+
+            user = result.scalars().first()
+            return user
+
     async def add(self, user: User):
         async with self.__async_session() as session:
             session.add(user)

@@ -117,3 +117,6 @@ class MainMoviesRequest(BaseModel):
 
 class SearchMoviesRequest(BaseModel):
     searched_title: str
+
+class UserRequest(BaseModel):
+    user_id: int
