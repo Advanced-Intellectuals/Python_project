@@ -114,3 +114,6 @@ class MainMoviesRequest(BaseModel):
     start_year: Optional[int] = None
     end_year: Optional[int] = None
     genres: Optional[list[str]] = None
+
+class SearchMoviesRequest(BaseModel):
+    searched_title: str

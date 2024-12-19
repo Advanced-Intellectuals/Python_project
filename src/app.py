@@ -8,6 +8,7 @@ from dotenv import load_dotenv
 from services.user import UserService
 from services.movie import MovieService
 from models import LoginRequest, RegisterRequest, MainMoviesRequest
+from models import SearchMoviesRequest
 
 load_dotenv()
 
@@ -126,6 +127,18 @@ class App():
                 raise e
 
             return {"movies": movies}
+
+        @self.__app.get("/search")
+        async def search(request: Request, response: Response, data: SearchMoviesRequest):
+            searched = data.searched_title
+
+            try:
+                movies = await movie_service.search_movies(searched)
+            except Exception as e:
+                raise e
+
+            return {"movies": movies}
+
 
     def get_app(self):
         return self.__app
