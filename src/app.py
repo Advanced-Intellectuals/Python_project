@@ -4,10 +4,11 @@ from fastapi.responses import JSONResponse
 from itsdangerous import URLSafeSerializer, BadSignature
 import os
 from dotenv import load_dotenv
+from minio.deleteobjects import DeleteRequest
 
 from services.user import UserService
 from services.movie import MovieService
-from models import LoginRequest, RegisterRequest, MainMoviesRequest, UserRequest
+from models import LoginRequest, RegisterRequest, MainMoviesRequest, UserRequest, LogoutRequest
 from models import SearchMoviesRequest
 
 load_dotenv()
@@ -151,6 +152,18 @@ class App():
                 raise e
 
             return {"movies": movies}
+
+        @self.__app.post("/logout")
+        async def logout(request: Request, response: Response):
+            try:
+                # Удаление куки с сессией
+                response.delete_cookie(
+                    key="session",
+                    path='/',  # Должен совпадать с тем, что указан при установке куки
+                )
+                return {"message": "Successfully logged out"}
+            except Exception as e:
+                raise HTTPException(status_code=500, detail="Logout failed")
 
     def get_app(self):
         return self.__app
