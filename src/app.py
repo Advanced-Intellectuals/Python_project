@@ -152,5 +152,17 @@ class App():
 
             return {"movies": movies}
 
+        @self.__app.post("/logout")
+        async def logout(request: Request, response: Response):
+            try:
+                # Удаление куки с сессией
+                response.delete_cookie(
+                    key="session",
+                    path='/',  # Должен совпадать с тем, что указан при установке куки
+                )
+                return {"message": "Successfully logged out"}
+            except Exception as e:
+                raise HTTPException(status_code=500, detail="Logout failed")
+
     def get_app(self):
         return self.__app
