@@ -4,7 +4,6 @@ from fastapi.responses import JSONResponse
 from itsdangerous import URLSafeSerializer, BadSignature
 import os
 from dotenv import load_dotenv
-from minio.deleteobjects import DeleteRequest
 
 from services.user import UserService
 from services.movie import MovieService
