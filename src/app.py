@@ -8,7 +8,7 @@ from minio.deleteobjects import DeleteRequest
 
 from services.user import UserService
 from services.movie import MovieService
-from models import LoginRequest, RegisterRequest, MainMoviesRequest, UserRequest, LogoutRequest
+from models import LoginRequest, RegisterRequest, MainMoviesRequest, UserRequest
 from models import SearchMoviesRequest
 
 load_dotenv()
