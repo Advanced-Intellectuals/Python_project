@@ -58,6 +58,17 @@ class MovieRepo():
 
             return movies
 
+    async def find(self, line: str):
+        async with self.__async_session() as session:
+            search = '%' + line + '%'
+            statement = select(Movie).options(joinedload(
+                Movie.watched_by), joinedload(Movie.scores)).where(Movie.name.ilike(search))
+
+            result = await session.execute(statement.limit(20))
+            movies = result.unique().scalars().all()
+
+            return movies
+
     async def add(self, movie: Movie):
         async with self.__async_session() as session:
             session.add(movie)

@@ -17,7 +17,7 @@ class UserService:
         database_password = current_user.password_hash
 
         if self.hasher.compare(password, database_password):
-            return current_user.user_id
+            return {"user_id": current_user.user_id, "role": current_user.role}
         return None
 
     async def register(self, username, password, first_name, email):
@@ -28,8 +28,19 @@ class UserService:
                 status_code=409, detail="A user with this username already exists.")
         else:
             user_password = self.hasher.hash(password)
-            user = User(login=username, password_hash=user_password,
+            user = User(login=username, password_hash=user_password, role="user",
                         first_name=first_name, email=email)
 
             await self.user_repo.add(user)
-            return user.user_id
+            return {"user_id": user.user_id, "role": user.role}
+
+    async def watched(self, user_id):
+        current_user = await self.user_repo.get_by_id(user_id)
+
+        if current_user is None:
+            raise HTTPException(
+                status_code=401, detail="A user with this id does not exist.")
+        else:
+            movies = current_user.watched_movies
+
+        return movies

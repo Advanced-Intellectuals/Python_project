@@ -30,6 +30,7 @@ class User(Base):
     user_id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
     login: Mapped[str] = mapped_column(String, nullable=True)
     password_hash: Mapped[str] = mapped_column(String, nullable=True)
+    role: Mapped[str] = mapped_column(String, nullable=True)
     first_name: Mapped[str] = mapped_column(String, nullable=True)
     email: Mapped[str] = mapped_column(String, nullable=True)
 
@@ -114,3 +115,9 @@ class MainMoviesRequest(BaseModel):
     start_year: Optional[int] = None
     end_year: Optional[int] = None
     genres: Optional[list[str]] = None
+
+class SearchMoviesRequest(BaseModel):
+    searched_title: str
+
+class UserRequest(BaseModel):
+    user_id: int
