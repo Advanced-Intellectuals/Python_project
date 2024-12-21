@@ -3,7 +3,8 @@ from fastapi_cache import FastAPICache
 from fastapi_cache.backends.inmemory import InMemoryBackend
 from fastapi_cache.decorator import cache
 from src.read_data import CompactData
-from src.recommender import Recommender
+from src.recommender import Simple_Recommender
+from src.repository import Repository
 import os
 import logging
 
@@ -14,13 +15,12 @@ logger = logging.getLogger(__name__)
 app = FastAPI()
 
 # Пути к данным и модели
-DATA_PATH = "data/rating.csv"
+# DATA_PATH = "data/rating.csv"
 PROCESSED_DATA_PATH = "data/preprocessed_data.pkl"
-
 data = None
 recommender = None
 
-def initialize_system():
+async def initialize_system():
     """
     Инициализирует данные и рекомендательную систему.
     """
@@ -31,16 +31,14 @@ def initialize_system():
         data = CompactData().load_preprocessed_data(PROCESSED_DATA_PATH)
         logger.info("Preprocessed data successfully loaded from file.")
     else:
-        if not os.path.exists(DATA_PATH):
-            raise FileNotFoundError(f"Data file not found: {DATA_PATH}")
 
-        data = CompactData(DATA_PATH)
-        data.load_data()
+        data = CompactData()
+        await data.load_data()
         data.data_preprocessing()
         data.save_preprocessed_data(PROCESSED_DATA_PATH)
         logger.info("Data successfully loaded, preprocessed, and saved.")
 
-    recommender = Recommender(data)
+    recommender = Simple_Recommender(data)
     logger.info("Recommender system initialized.")
 
 @app.on_event("startup")
@@ -49,7 +47,7 @@ async def startup_event():
     Выполняется при запуске приложения.
     """
     FastAPICache.init(InMemoryBackend())
-    initialize_system()
+    await initialize_system()
 
 @app.get("/recommendations/user/{user_id}")
 @cache(expire=3600)
@@ -85,7 +83,7 @@ async def reload_system():
     Перезагружает данные и модель.
     """
     try:
-        initialize_system()
+        await initialize_system()
         return {"message": "System reloaded successfully."}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error reloading system: {e}")
@@ -144,3 +142,7 @@ async def help():
         "/admin/clear_data": "Clears preprocessed data",
         "/help": "Provides information about available endpoints"
     }
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)
