@@ -26,6 +26,7 @@ class CompactData:
     async def load_data(self):
         """Loads raw data from Database."""
         self.df = pd.DataFrame(await self.repo.get_all(), columns=['userId', 'movieId', 'rating'])
+        print(self.df)
 
     def data_preprocessing(self):
         """Preprocesses data to create mappings and user-item matrix."""
@@ -66,6 +67,13 @@ class CompactData:
             print(f"Preprocessed data loaded from {path}")
             return True
         return False
+
+    async def get_watched_ids(self, user_id):
+        """Возвращает список индексов просмотренных фильмов для данного пользователя."""
+        movie_ids = await self.repo.get_watched(user_id)
+        # Преобразуем ID фильмов в индексы матрицы через movie_mapper
+        watched_indices = [self.movie_mapper[movie_id] for movie_id in movie_ids]
+        return watched_indices
 
     def getcol(self, col):
         """Returns a specific column from the user-item matrix."""
