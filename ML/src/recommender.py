@@ -2,7 +2,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 import numpy as np
 from src.read_data import CompactData
 
-class Recommender:
+class Simple_Recommender:
 
     """
     Recommends movies to users based on their ratings and the ratings of their k-nearest neighbors.
@@ -60,7 +60,7 @@ class Recommender:
             nearest_neighbors = similarity_scores.argsort()[::-1][:k]
             top_k_scores = similarity_scores[nearest_neighbors]
 
-            return nearest_neighbors.astype(np.int16), top_k_scores
+            return nearest_neighbors.astype(np.int32), top_k_scores
 
         except KeyError:
             print(f"Error: User with ID {user_id} not found in user_mapper.")
@@ -105,8 +105,10 @@ class Recommender:
             # Extract neighbors' ratings and apply similarity-based weighting
             neighbor_ratings = self.data.user_item_matrix[nearest_neighbors].toarray()
             similarity_scores = np.array(similarity_scores).reshape(-1, 1)  # Reshape for matrix multiplication
-            weighted_ratings = np.nan_to_num(neighbor_ratings) * similarity_scores
-            average_neighbor_ratings = np.sum(weighted_ratings, axis=0) / np.sum(similarity_scores)
+
+            # Compute weighted sum of ratings and normalize by similarity scores
+            weighted_ratings = np.dot(similarity_scores.T, neighbor_ratings).flatten()
+            average_neighbor_ratings = weighted_ratings / np.sum(similarity_scores)
 
             # Identify movies the user hasn't rated
             user_rated_movies = self.data.user_item_matrix[self.data.user_mapper[user_id]].nonzero()[1]
@@ -137,7 +139,8 @@ class Recommender:
         try:
             # Use cosine similarity to find similar movies
             movie_similarity_scores = cosine_similarity(self.data.user_item_matrix.T, self.data.user_item_matrix.T[movie_index])
-            similar_movies_indices = movie_similarity_scores.flatten().argsort()[::-1][1:k + 1]  # Exclude the movie itself
+            movie_similarity_scores[movie_index] = -2
+            similar_movies_indices = movie_similarity_scores.flatten().argsort()[::-1][:k]
             recommended_movies = [self.data.index_movie[i] for i in similar_movies_indices]
 
             return recommended_movies
@@ -145,3 +148,5 @@ class Recommender:
             print(f"Unexpected error in 'get_movie_recommendations': {e}")
             return []
 
+class Modern_Recommender:
+    pass

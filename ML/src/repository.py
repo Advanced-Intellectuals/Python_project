@@ -1,10 +1,10 @@
 from sqlalchemy import select, insert
 from sqlalchemy.orm import joinedload
-from models import Score, User, watched_table
-from db import async_session
+from src.models import Score, User, watched_table
+from src.db import async_session
 
 
-class Repository():
+class Repository:
     __async_session = async_session
 
     async def get_all(self):
@@ -14,7 +14,7 @@ class Repository():
             res = await session.execute(statement)
             scores = res.scalars().all()
 
-            return [{"user_id": s.user_id, "movie_id": s.movie_id, "score": s.score} for s in scores]
+            return [[s.user_id, s.movie_id, s.score] for s in scores]
 
     async def get_watched(self, user_id: int):
         async with self.__async_session() as session:
