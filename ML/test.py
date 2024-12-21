@@ -14,9 +14,7 @@ logger = logging.getLogger(__name__)
 
 app = FastAPI()
 
-# Пути к данным и модели
-# DATA_PATH = "data/rating.csv"
-PROCESSED_DATA_PATH = "preprocessed_data.pkl"
+
 data = None
 recommender = None
 
@@ -26,17 +24,10 @@ async def initialize_system():
     """
     global data, recommender
 
-    # Проверяем наличие предварительно обработанных данных
-    if os.path.exists(PROCESSED_DATA_PATH):
-        data = CompactData().load_preprocessed_data(PROCESSED_DATA_PATH)
-        logger.info("Preprocessed data successfully loaded from file.")
-    else:
-
-        data = CompactData()
-        await data.load_data()
-        data.data_preprocessing()
-        data.save_preprocessed_data(PROCESSED_DATA_PATH)
-        logger.info("Data successfully loaded, preprocessed, and saved.")
+    data = CompactData()
+    await data.load_data()
+    data.data_preprocessing()
+    logger.info("Data successfully loaded and preprocessed.")
 
     recommender = Simple_Recommender(data)
     logger.info("Recommender system initialized.")
@@ -102,31 +93,6 @@ async def system_status():
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error fetching system status: {e}")
-
-@app.post("/admin/save_data")
-async def save_data():
-    """
-    Сохраняет предварительно обработанные данные.
-    """
-    try:
-        data.save_preprocessed_data(PROCESSED_DATA_PATH)
-        return {"message": "Preprocessed data saved successfully."}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error saving preprocessed data: {e}")
-
-@app.post("/admin/clear_data")
-async def clear_data():
-    """
-    Удаляет сохраненные предварительно обработанные данные.
-    """
-    try:
-        if os.path.exists(PROCESSED_DATA_PATH):
-            os.remove(PROCESSED_DATA_PATH)
-            return {"message": "Preprocessed data cleared successfully."}
-        else:
-            raise FileNotFoundError("No preprocessed data to clear.")
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error clearing preprocessed data: {e}")
 
 @app.get("/help")
 async def help():

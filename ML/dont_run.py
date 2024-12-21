@@ -5,7 +5,9 @@ import asyncio as asy
 async def main():
     data = CompactData()
     await data.load_data()
-    # data.data_preprocessing()
+    data.data_preprocessing()
+    k = await Simple_Recommender(data).get_user_recommendations(3, 10, 5)
+    print(k)
 
 # print(Simple_Recommender(data).get_user_recommendations(1, 10, 5))
 asy.run(main())
