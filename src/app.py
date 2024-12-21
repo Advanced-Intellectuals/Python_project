@@ -4,6 +4,7 @@ from fastapi.responses import JSONResponse
 from itsdangerous import URLSafeSerializer, BadSignature
 import os
 from dotenv import load_dotenv
+import requests
 
 from services.user import UserService
 from services.movie import MovieService
@@ -118,6 +119,32 @@ class App():
             else:
                 raise HTTPException(
                     status_code=401, detail="Invalid password.")
+
+        @self.__app.get("/recomendations")
+        async def reccomendations(request: Request, response: Response):
+
+            session_cookie = request.cookies.get("session")
+
+            if not session_cookie:
+                raise HTTPException(status_code=401, detail="No session cookie found.")
+
+            user_data = self.__serializer.get_user_data_from_session(session_cookie)
+            if user_data is None:
+                raise HTTPException(status_code=401, detail="Invalid or expired session.")
+
+            user_id = user_data["user_id"]
+            url = f"http://localhost:8001/recommendations/user/{user_id}"
+
+            try:
+                api_response = requests.get(url)
+                api_response.raise_for_status()  # Проверяем, что запрос прошёл успешно
+                recommendations = api_response.json()  # Извлекаем данные из ответа
+                return recommendations  # Возвращаем рекомендации клиенту
+            except requests.RequestException as e:
+                raise HTTPException(
+                    status_code=500,
+                    detail=f"Failed to fetch recommendations: {str(e)}"
+                )
 
         @self.__app.get("/movies")
         async def main_movies(request: Request, response: Response, data: MainMoviesRequest):
