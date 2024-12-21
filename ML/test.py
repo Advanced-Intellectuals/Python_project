@@ -26,7 +26,7 @@ async def initialize_system():
     data = CompactData()
     await data.load_data()
     data.data_preprocessing()
-    logger.info("Data successfully loaded, preprocessed, and saved.")
+    logger.info("Data successfully loaded and preprocessed.")
 
     recommender = Simple_Recommender(data)
     logger.info("Recommender system initialized.")
