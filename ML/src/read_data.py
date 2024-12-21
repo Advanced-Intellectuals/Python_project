@@ -26,7 +26,6 @@ class CompactData:
     async def load_data(self):
         """Loads raw data from Database."""
         self.df = pd.DataFrame(await self.repo.get_all(), columns=['userId', 'movieId', 'rating'])
-        print(self.df)
 
     def data_preprocessing(self):
         """Preprocesses data to create mappings and user-item matrix."""

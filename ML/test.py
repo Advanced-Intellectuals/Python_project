@@ -5,6 +5,7 @@ from fastapi_cache.decorator import cache
 from src.read_data import CompactData
 from src.recommender import Simple_Recommender
 from src.repository import Repository
+from src.scheduler import DataUpdateScheduler
 import os
 import logging
 
@@ -17,12 +18,13 @@ app = FastAPI()
 
 data = None
 recommender = None
+scheduler = None
 
 async def initialize_system():
     """
     Инициализирует данные и рекомендательную систему.
     """
-    global data, recommender
+    global data, recommender, scheduler
 
     data = CompactData()
     await data.load_data()
@@ -32,6 +34,11 @@ async def initialize_system():
     recommender = Simple_Recommender(data)
     logger.info("Recommender system initialized.")
 
+    # Инициализация и запуск планировщика
+    scheduler = DataUpdateScheduler(data, recommender)
+    scheduler.start()
+    logger.info("Data update scheduler started.")
+
 @app.on_event("startup")
 async def startup_event():
     """
@@ -40,6 +47,15 @@ async def startup_event():
     FastAPICache.init(InMemoryBackend())
     await initialize_system()
 
+@app.on_event("shutdown")
+async def shutdown_event():
+    """
+    Выполняется при остановке приложения.
+    """
+    if scheduler:
+        scheduler.stop()
+        logger.info("Scheduler stopped during shutdown.")
+
 @app.get("/recommendations/user/{user_id}")
 @cache(expire=3600)
 async def recommend_user(user_id: int, neighbours: int = 1, films: int = 10):
@@ -47,7 +63,7 @@ async def recommend_user(user_id: int, neighbours: int = 1, films: int = 10):
     Рекомендует фильмы для пользователя.
     """
     try:
-        recommendations = recommender.get_user_recommendations(user_id, neighbours, films)
+        recommendations = await recommender.get_user_recommendations(user_id, neighbours, films)
         if not recommendations:
             raise HTTPException(status_code=404, detail="No recommendations found.")
         return {"user_id": user_id, "recommendations": recommendations}

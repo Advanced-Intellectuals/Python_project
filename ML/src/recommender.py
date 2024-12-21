@@ -145,6 +145,9 @@ class Simple_Recommender:
             # Use cosine similarity to find similar movies
             movie_similarity_scores = cosine_similarity(self.data.user_item_matrix.T, self.data.user_item_matrix.T[movie_index])
             movie_similarity_scores[movie_index] = -2
+
+            if k > len(self.data.movie_mapper): k = len(self.data.movie_mapper)
+
             similar_movies_indices = movie_similarity_scores.flatten().argsort()[::-1][:k]
             recommended_movies = [self.data.index_movie[i] for i in similar_movies_indices]
 
