@@ -16,7 +16,7 @@ app = FastAPI()
 
 # Пути к данным и модели
 # DATA_PATH = "data/rating.csv"
-PROCESSED_DATA_PATH = "data/preprocessed_data.pkl"
+PROCESSED_DATA_PATH = "preprocessed_data.pkl"
 data = None
 recommender = None
 
@@ -51,7 +51,7 @@ async def startup_event():
 
 @app.get("/recommendations/user/{user_id}")
 @cache(expire=3600)
-async def recommend_user(user_id: int, neighbours: int = 10, films: int = 10):
+async def recommend_user(user_id: int, neighbours: int = 1, films: int = 10):
     """
     Рекомендует фильмы для пользователя.
     """
@@ -145,4 +145,4 @@ async def help():
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=8001)
