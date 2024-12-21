@@ -137,9 +137,12 @@ class App():
 
             try:
                 api_response = requests.get(url)
-                api_response.raise_for_status()  # Проверяем, что запрос прошёл успешно
-                recommendations = api_response.json()  # Извлекаем данные из ответа
-                return recommendations  # Возвращаем рекомендации клиенту
+                api_response.raise_for_status()
+                recommendations = api_response.json()
+
+                recommend_movies = await movie_service.recommend_movies(recommendations["recommendations"])
+
+                return recommend_movies
             except requests.RequestException as e:
                 raise HTTPException(
                     status_code=500,

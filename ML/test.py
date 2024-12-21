@@ -47,7 +47,7 @@ async def recommend_user(user_id: int, neighbours: int = 1, films: int = 10):
     Рекомендует фильмы для пользователя.
     """
     try:
-        recommendations = recommender.get_user_recommendations(user_id, neighbours, films)
+        recommendations = await recommender.get_user_recommendations(user_id, neighbours, films)
         if not recommendations:
             raise HTTPException(status_code=404, detail="No recommendations found.")
         return {"user_id": user_id, "recommendations": recommendations}

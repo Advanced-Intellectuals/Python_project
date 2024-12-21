@@ -21,3 +21,8 @@ class MovieService:
         movies = await self.movie_repo.find(searched_title)
 
         return movies
+
+    async def recommend_movies(self, ids: list[int]):
+        movies = await self.movie_repo.get_by_ids(ids)
+
+        return movies
