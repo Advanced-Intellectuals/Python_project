@@ -30,6 +30,7 @@ class User(Base):
     user_id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
     login: Mapped[str] = mapped_column(String, nullable=True)
     password_hash: Mapped[str] = mapped_column(String, nullable=True)
+    role: Mapped[str] = mapped_column(String, nullable=True)
     first_name: Mapped[str] = mapped_column(String, nullable=True)
     email: Mapped[str] = mapped_column(String, nullable=True)
 
