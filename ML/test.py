@@ -4,9 +4,7 @@ from fastapi_cache.backends.inmemory import InMemoryBackend
 from fastapi_cache.decorator import cache
 from src.read_data import CompactData
 from src.recommender import Simple_Recommender
-from src.repository import Repository
 from src.scheduler import DataUpdateScheduler
-import os
 import logging
 
 # Настройка логирования
