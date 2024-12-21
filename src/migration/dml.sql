@@ -1,6 +1,6 @@
 -- User insert example
 INSERT INTO users (login, password_hash, first_name, email)
-VALUES ('tsalikhov', '1234', 'Tim', 'tim@mai.ru')
+VALUES ('tsalikhov', '$2b$10$OwmvNOfj1/r6L02v8Y.tdexuiOvoEeUzCZ/iyM4Njy7.q6DPml1rG', 'admin', 'Tim', 'tim@mai.ru')
 
 -- Movies insert example
 INSERT INTO movies (name, genres, year, preview, file)

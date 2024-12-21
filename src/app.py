@@ -18,15 +18,20 @@ class Serializer():
         self.__serializer = URLSafeSerializer(os.getenv('COOKIE_SECRET_KEY'))
 
     # Функция для создания сессионной куки
-    def create_session(self, user_id: int):
-        session_cookie = self.__serializer.dumps({"user_id": user_id})
+    def create_session(self, user_data: dict):
+        session_cookie = self.__serializer.dumps({
+            "user_id": user_data["user_id"],
+            "role": user_data["role"]
+        })
         return session_cookie
 
-    # Функция для извлечения user_id из сессионной куки
-    def get_user_id_from_session(self, cookie: str):
+    def get_user_data_from_session(self, cookie: str):
         try:
             session_data = self.__serializer.loads(cookie)
-            return session_data.get("user_id")
+            return {
+                "user_id": session_data.get("user_id"),
+                "role": session_data.get("role")
+            }
         except BadSignature:
             return None  # Неверная подпись или кука устарела
 
@@ -46,13 +51,13 @@ class App():
             user_password = data.user_password
 
             try:
-                user_id = await user_service.login(user_login, user_password)
+                user_data = await user_service.login(user_login, user_password)
             except Exception as e:
                 raise e
 
-            if user_id:
+            if user_data:
                 # создание сессии
-                session_cookie = self.__serializer.create_session(user_id)
+                session_cookie = self.__serializer.create_session(user_data)
                 response.set_cookie(
                     key="session",
                     value=session_cookie,
@@ -69,20 +74,22 @@ class App():
 
         @self.__app.get("/login")
         async def login(request: Request, response: Response):
-            session_cookie = request.cookies.get(
-                "session")  # Извлекаем куку из запроса
+            session_cookie = request.cookies.get("session")  # Извлекаем куку из запроса
             print(f"Received cookie: {session_cookie}")
+
             if not session_cookie:
                 raise HTTPException(
-                    status_code=401, detail="No session cookie found.")
+                    status_code=401, detail="No session cookie found."
+                )
 
-            user_id = self.__serializer.get_user_id_from_session(
-                session_cookie)  # Извлекаем user_id из куки
-            if user_id is None:
+            user_data = self.__serializer.get_user_data_from_session(
+                session_cookie)  # Извлекаем данные пользователя из куки
+            if user_data is None:
                 raise HTTPException(
-                    status_code=401, detail="Invalid or expired session.")
+                    status_code=401, detail="Invalid or expired session."
+                )
 
-            return {"user_id": user_id}  # Возвращаем user_id в ответе
+            return {"user_id": user_data["user_id"], "role": user_data["role"]}  # Возвращаем user_id и role в ответе
 
         @self.__app.post("/register")
         async def register(request: Request, response: Response, data: RegisterRequest):

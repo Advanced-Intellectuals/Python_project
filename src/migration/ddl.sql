@@ -2,6 +2,7 @@ CREATE TABLE "users"(
     "user_id" SERIAL NOT NULL PRIMARY KEY,
     "login" VARCHAR(255) NULL,
     "password_hash" VARCHAR(255) NULL,
+    "role" VARCHAR(255) NULL, 
     "first_name" VARCHAR(255) NULL,
     "email" VARCHAR(255) NULL
 );

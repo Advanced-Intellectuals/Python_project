@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 from scipy.sparse import csr_matrix
+from src.repository import Repository
 import pickle
 import os
 
@@ -8,32 +9,23 @@ import os
 class CompactData:
 
     """
-    Class CompactData is a data structure to store a compact representation of the original data.
-    It is used by the Recommender class to store the user-item matrix and the mapper dictionaries.
+    Class representing compact data for recommendation system.
     """
 
-    def __init__(self, path=None):
+    def __init__(self):
         """
         Initializes the CompactData object.
-
-        Args:
-            path (str): Path to the CSV file directory.
         """
         self.user_mapper = None
         self.movie_mapper = None
         self.index_movie = None
         self.df = None
         self.user_item_matrix = None
-        self.path = path
+        self.repo = Repository()
 
-    def load_data(self, path=None):
-        """Loads raw data from the CSV file."""
-        if path is None:
-            path = self.path
-
-        if path is None:
-            raise ValueError("Path to the CSV file is not provided.")
-        self.df = pd.read_csv(path, usecols=['userId', 'rating', 'movieId'])
+    async def load_data(self):
+        """Loads raw data from Database."""
+        self.df = pd.DataFrame(await self.repo.get_all(), columns=['userId', 'movieId', 'rating'])
 
     def data_preprocessing(self):
         """Preprocesses data to create mappings and user-item matrix."""
