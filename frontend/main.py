@@ -3,18 +3,14 @@ from pages.user import movies, recommendations, watched, search, movie
 from pages.auth import login, register
 from pages.admin import add_movie
 
+st.set_page_config(layout="wide")
+
 USER_TABLE = {
     "Главная": movies,
     "Рекомендации": recommendations,
     "Поиск": search,
     "Личный кабинет": watched
 }
-
-ADMIN_TABLE = {
-    "Добавление фильма": add_movie
-}
-
-st.set_page_config(layout="wide")
 
 if 'logged' not in st.session_state:
     st.session_state['logged'] = 1

@@ -26,7 +26,7 @@ def main():
     
     st.title("Просмотренные фильмы:")
 
-    draw_movies(movies, 6)
+    draw_movies(movies, 6, __file__)
 
 if __name__ == "__main__":
     main()
