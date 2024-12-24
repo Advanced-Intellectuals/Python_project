@@ -58,7 +58,7 @@ class Simple_Recommender:
             # similarity_scores[self.data.user_mapper[user_id]] = -2
             similarity_scores[user_id] = -2
 
-            if k > len(self.data.user_mapper): k = len(self.data.user_mapper)
+            if k > len(self.data.user_mapper): k = len(self.data.user_mapper) - 1
 
             # Get the indices of the top-k most similar users
             nearest_neighbors = similarity_scores.argsort()[::-1][:k]
@@ -124,6 +124,8 @@ class Simple_Recommender:
             recommended_movie_indices = np.argsort(-unrated_ratings)  # Descending order
             recommended_movies = [self.data.index_movie[idx] for idx in recommended_movie_indices]
 
+            if films > len(self.data.movie_mapper): films = len(self.data.movie_mapper)
+
             return recommended_movies[:films]
 
         except ValueError as e:
@@ -146,9 +148,9 @@ class Simple_Recommender:
             movie_similarity_scores = cosine_similarity(self.data.user_item_matrix.T, self.data.user_item_matrix.T[movie_index])
             movie_similarity_scores[movie_index] = -2
 
-            if k > len(self.data.movie_mapper): k = len(self.data.movie_mapper)
+            if k > len(self.data.movie_mapper): k = len(self.data.movie_mapper) - 1
 
-            similar_movies_indices = movie_similarity_scores.flatten().argsort()[::-1][:k]
+            similar_movies_indices = (movie_similarity_scores.flatten().argsort()[::-1])[:k]
             recommended_movies = [self.data.index_movie[i] for i in similar_movies_indices]
 
             return recommended_movies
