@@ -78,7 +78,7 @@ async def recommend_movie(movie_id: int, k: int = 10):
         recommendations = recommender.get_movie_recommendations(movie_id, k)
         # if not recommendations:
         #     raise HTTPException(status_code=404, detail=f"No similar movies found for '{movie_id}'.")
-        return {"movie_title": movie_id, "recommendations": recommendations}
+        return {"movie_id": movie_id, "recommendations": recommendations}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error generating movie recommendations: {e}")
 
