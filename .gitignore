@@ -5,5 +5,6 @@ ML/data
 .DS_Store
 .idea
 test.json
+.coverage
 preprocessed_data.pkl
 .streamlit
