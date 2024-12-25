@@ -19,11 +19,11 @@ logger = logging.getLogger(__name__)
 
 app = FastAPI()
 
-ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
-ssl_context.load_cert_chain(
-    os.getenv("CERT_PATH"),
-    keyfile=os.getenv("KEY_PATH")
-)
+# ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+# ssl_context.load_cert_chain(
+#     os.getenv("CERT_PATH"),
+#     keyfile=os.getenv("KEY_PATH")
+# )
 
 
 data = None
@@ -84,7 +84,7 @@ async def recommend_user(user_id: int, neighbours: int = 1, films: int = 10):
             status_code=422, detail=f"Error generating recommendations: {e}")
 
 
-@app.get("/recommendations/movie/{movie_title}")
+@app.get("/recommendations/movie/{movie_id}")
 @cache(expire=3600)
 async def recommend_movie(movie_id: int, k: int = 10):
     """
@@ -144,4 +144,4 @@ async def help():
     }
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8001, ssl=ssl_context)
+    uvicorn.run(app, host="0.0.0.0", port=8001)
