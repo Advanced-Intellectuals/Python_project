@@ -104,7 +104,8 @@ class Simple_Recommender:
             # Find nearest neighbors
             nearest_neighbors, similarity_scores = self.get_k_nearest_neighbors(user_id, neighbours, user_ratings)
             if nearest_neighbors is None or len(nearest_neighbors) == 0:
-                raise ValueError(f"No nearest neighbors found for user ID {user_id}.")
+                # raise ValueError(f"No nearest neighbors found for user ID {user_id}.")
+                return []
 
             # Extract neighbors' ratings and apply similarity-based weighting
             neighbor_ratings = self.data.user_item_matrix[nearest_neighbors].toarray()
@@ -124,7 +125,7 @@ class Simple_Recommender:
             recommended_movie_indices = np.argsort(-unrated_ratings)  # Descending order
             recommended_movies = [self.data.index_movie[idx] for idx in recommended_movie_indices]
 
-            if films > len(self.data.movie_mapper): films = len(self.data.movie_mapper)
+            if films > len(recommended_movies): films = len(recommended_movies)
 
             return recommended_movies[:films]
 

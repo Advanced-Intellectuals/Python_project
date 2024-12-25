@@ -6,8 +6,11 @@ async def main():
     data = CompactData()
     await data.load_data()
     data.data_preprocessing()
-    k = await Simple_Recommender(data).get_user_recommendations(1, 10, 5)
-    print(k)
+    k = Simple_Recommender(data)
+    a = k.get_movie_recommendations(1)
+    print(a)
 
 # print(Simple_Recommender(data).get_user_recommendations(1, 10, 5))
 asy.run(main())
+
+# print(Simple_Recommender(data).get_movie_recommendations(2))
