@@ -78,13 +78,10 @@ async def recommend_user(user_id: int, neighbours: int = 1, films: int = 10):
     """
     try:
         recommendations = await recommender.get_user_recommendations(user_id, neighbours, films)
-        if not recommendations:
-            raise HTTPException(
-                status_code=404, detail="No recommendations found.")
         return {"user_id": user_id, "recommendations": recommendations}
     except Exception as e:
         raise HTTPException(
-            status_code=500, detail=f"Error generating recommendations: {e}")
+            status_code=422, detail=f"Error generating recommendations: {e}")
 
 
 @app.get("/recommendations/movie/{movie_title}")
@@ -95,13 +92,10 @@ async def recommend_movie(movie_id: int, k: int = 10):
     """
     try:
         recommendations = recommender.get_movie_recommendations(movie_id, k)
-        if not recommendations:
-            raise HTTPException(
-                status_code=404, detail=f"No similar movies found for '{movie_id}'.")
         return {"movie_title": movie_id, "recommendations": recommendations}
     except Exception as e:
         raise HTTPException(
-            status_code=500, detail=f"Error generating movie recommendations: {e}")
+            status_code=422, detail=f"Error generating movie recommendations: {e}")
 
 
 @app.post("/admin/reload")
@@ -114,7 +108,7 @@ async def reload_system():
         return {"message": "System reloaded successfully."}
     except Exception as e:
         raise HTTPException(
-            status_code=500, detail=f"Error reloading system: {e}")
+            status_code=422, detail=f"Error reloading system: {e}")
 
 
 @app.get("/admin/status")
@@ -131,7 +125,7 @@ async def system_status():
         }
     except Exception as e:
         raise HTTPException(
-            status_code=500, detail=f"Error fetching system status: {e}")
+            status_code=422, detail=f"Error fetching system status: {e}")
 
 
 @app.get("/help")
