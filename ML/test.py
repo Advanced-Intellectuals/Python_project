@@ -62,9 +62,9 @@ async def recommend_user(user_id: int, neighbours: int = 1, films: int = 10):
     """
     try:
         recommendations = await recommender.get_user_recommendations(user_id, neighbours, films)
-        if not recommendations:
-            raise HTTPException(status_code=404, detail="No recommendations found.")
-        return {"user_id": user_id, "recommendations": recommendations}
+        # if not recommendations:
+        #     raise HTTPException(status_code=404, detail="No recommendations found.")
+        return {"user_id": user_id, "recommendations": recommendations.tolist()}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error generating recommendations: {e}")
 
@@ -76,8 +76,8 @@ async def recommend_movie(movie_id: int, k: int = 10):
     """
     try:
         recommendations = recommender.get_movie_recommendations(movie_id, k)
-        if not recommendations:
-            raise HTTPException(status_code=404, detail=f"No similar movies found for '{movie_id}'.")
+        # if not recommendations:
+        #     raise HTTPException(status_code=404, detail=f"No similar movies found for '{movie_id}'.")
         return {"movie_title": movie_id, "recommendations": recommendations}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error generating movie recommendations: {e}")
