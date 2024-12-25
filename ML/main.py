@@ -5,7 +5,13 @@ from fastapi_cache.decorator import cache
 from src.read_data import CompactData
 from src.recommender import Simple_Recommender
 from src.scheduler import DataUpdateScheduler
+import uvicorn
 import logging
+import os
+import ssl
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Настройка логирования
 logging.basicConfig(level=logging.INFO)
@@ -13,10 +19,17 @@ logger = logging.getLogger(__name__)
 
 app = FastAPI()
 
+ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+ssl_context.load_cert_chain(
+    os.getenv("CERT_PATH"),
+    keyfile=os.getenv("KEY_PATH")
+)
+
 
 data = None
 recommender = None
 scheduler = None
+
 
 async def initialize_system():
     """
@@ -37,6 +50,7 @@ async def initialize_system():
     scheduler.start()
     logger.info("Data update scheduler started.")
 
+
 @app.on_event("startup")
 async def startup_event():
     """
@@ -44,6 +58,7 @@ async def startup_event():
     """
     FastAPICache.init(InMemoryBackend())
     await initialize_system()
+
 
 @app.on_event("shutdown")
 async def shutdown_event():
@@ -53,6 +68,7 @@ async def shutdown_event():
     if scheduler:
         scheduler.stop()
         logger.info("Scheduler stopped during shutdown.")
+
 
 @app.get("/recommendations/user/{user_id}")
 @cache(expire=3600)
@@ -64,9 +80,11 @@ async def recommend_user(user_id: int, neighbours: int = 1, films: int = 10):
         recommendations = await recommender.get_user_recommendations(user_id, neighbours, films)
         return {"user_id": user_id, "recommendations": recommendations}
     except Exception as e:
-        raise HTTPException(status_code=422, detail="No recommendations found.")
+        raise HTTPException(
+            status_code=422, detail=f"Error generating recommendations: {e}")
 
-@app.get("/recommendations/movie/{movie_id}")
+
+@app.get("/recommendations/movie/{movie_title}")
 @cache(expire=3600)
 async def recommend_movie(movie_id: int, k: int = 10):
     """
@@ -74,9 +92,11 @@ async def recommend_movie(movie_id: int, k: int = 10):
     """
     try:
         recommendations = recommender.get_movie_recommendations(movie_id, k)
-        return {"movie_id": movie_id, "recommendations": recommendations}
+        return {"movie_title": movie_id, "recommendations": recommendations}
     except Exception as e:
-        raise HTTPException(status_code=422, detail=f"No similar movies found for '{movie_id}'.")
+        raise HTTPException(
+            status_code=422, detail=f"Error generating movie recommendations: {e}")
+
 
 @app.post("/admin/reload")
 async def reload_system():
@@ -87,7 +107,9 @@ async def reload_system():
         await initialize_system()
         return {"message": "System reloaded successfully."}
     except Exception as e:
-        raise e
+        raise HTTPException(
+            status_code=422, detail=f"Error reloading system: {e}")
+
 
 @app.get("/admin/status")
 async def system_status():
@@ -102,7 +124,9 @@ async def system_status():
             "total_movies": len(data.movie_mapper) if isinstance(data, CompactData) else 0
         }
     except Exception as e:
-        raise e
+        raise HTTPException(
+            status_code=422, detail=f"Error fetching system status: {e}")
+
 
 @app.get("/help")
 async def help():
@@ -114,9 +138,10 @@ async def help():
         "/recommendations/movie/{movie_title}": "Recommends similar movies",
         "/admin/reload": "Reloads the system",
         "/admin/status": "Returns system status",
+        "/admin/save_data": "Saves preprocessed data",
+        "/admin/clear_data": "Clears preprocessed data",
         "/help": "Provides information about available endpoints"
     }
 
 if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8001)
+    uvicorn.run(app, host="0.0.0.0", port=8001, ssl=ssl_context)

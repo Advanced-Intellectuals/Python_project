@@ -9,7 +9,7 @@ import requests
 from services.user import UserService
 from services.movie import MovieService
 from models import LoginRequest, RegisterRequest, MainMoviesRequest, UserRequest
-from models import SearchMoviesRequest
+from models import SearchMoviesRequest, AddMovieRequest
 
 load_dotenv()
 
@@ -137,9 +137,12 @@ class App():
 
             try:
                 api_response = requests.get(url)
-                api_response.raise_for_status()  # Проверяем, что запрос прошёл успешно
-                recommendations = api_response.json()  # Извлекаем данные из ответа
-                return recommendations  # Возвращаем рекомендации клиенту
+                api_response.raise_for_status()
+                recommendations = api_response.json()
+
+                recommend_movies = await movie_service.recommend_movies(recommendations["recommendations"])
+
+                return recommend_movies
             except requests.RequestException as e:
                 raise HTTPException(
                     status_code=500,
@@ -197,6 +200,25 @@ class App():
                 return {"message": "Successfully logged out"}
             except Exception as e:
                 raise HTTPException(status_code=500, detail="Logout failed")
+
+        @self.__app.post("/add_movie")
+        async def add_movie(request: Request, response: Response, data: AddMovieRequest):
+
+            name = data.name
+            genres = data.genres
+            year = data.year
+            preview = data.preview
+            file = data.file
+
+            try:
+
+                await movie_service.add_movie(name, genres, year, preview, file)
+
+                response.status_code = 201
+                return {"message": "Movie successfully created"}
+            except Exception as e:
+                raise HTTPException(status_code=500, detail="Failed to add movie")
+
 
     def get_app(self):
         return self.__app
