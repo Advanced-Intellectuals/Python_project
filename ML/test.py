@@ -64,7 +64,7 @@ async def recommend_user(user_id: int, neighbours: int = 1, films: int = 10):
         recommendations = await recommender.get_user_recommendations(user_id, neighbours, films)
         # if not recommendations:
         #     raise HTTPException(status_code=404, detail="No recommendations found.")
-        return {"user_id": user_id, "recommendations": recommendations.tolist()}
+        return {"user_id": user_id, "recommendations": recommendations}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error generating recommendations: {e}")
 
