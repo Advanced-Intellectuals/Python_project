@@ -68,7 +68,7 @@ async def recommend_user(user_id: int, neighbours: int = 1, films: int = 10):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error generating recommendations: {e}")
 
-@app.get("/recommendations/movie/{movie_title}")
+@app.get("/recommendations/movie/{movie_id}")
 @cache(expire=3600)
 async def recommend_movie(movie_id: int, k: int = 10):
     """
@@ -118,8 +118,6 @@ async def help():
         "/recommendations/movie/{movie_title}": "Recommends similar movies",
         "/admin/reload": "Reloads the system",
         "/admin/status": "Returns system status",
-        "/admin/save_data": "Saves preprocessed data",
-        "/admin/clear_data": "Clears preprocessed data",
         "/help": "Provides information about available endpoints"
     }
 
