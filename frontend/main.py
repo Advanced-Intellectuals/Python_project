@@ -18,7 +18,7 @@ ADMIN_TABLE = {
 }
 
 if 'logged' not in st.session_state:
-    st.session_state['logged'] = 2
+    st.session_state['logged'] = 1
 
 if 'auth_page' not in st.session_state:
     st.session_state['auth_page'] = 'login'
@@ -29,21 +29,24 @@ if 'watching_movie' not in st.session_state:
 if 'previous_page' not in st.session_state:
     st.session_state['previous_page'] = list(USER_TABLE.keys())[0]
 
+
 def main():
     if st.session_state['logged'] == 0:
         if st.session_state['auth_page'] == 'login':
             login.main()
         else:
-            register.main()  
+            register.main()
     elif st.session_state['logged'] == 1:
         if st.session_state['watching_movie'] == 0:
-            page = st.sidebar.radio("Выберите", list(USER_TABLE.keys()), index=list(USER_TABLE.keys()).index(st.session_state['previous_page']))
+            page = st.sidebar.radio("Выберите", list(USER_TABLE.keys()), index=list(
+                USER_TABLE.keys()).index(st.session_state['previous_page']))
             USER_TABLE[page].main()
         else:
             movie.main()
     elif st.session_state['logged'] == 2:
         page = st.sidebar.radio("Выберите", list(ADMIN_TABLE.keys()))
         ADMIN_TABLE[page].main()
+
 
 if __name__ == "__main__":
     main()

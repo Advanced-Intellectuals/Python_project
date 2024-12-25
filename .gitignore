@@ -5,3 +5,5 @@ ML/data
 .DS_Store
 .idea
 test.json
+preprocessed_data.pkl
+.streamlit
