@@ -119,5 +119,12 @@ class MainMoviesRequest(BaseModel):
 class SearchMoviesRequest(BaseModel):
     searched_title: str
 
+class AddMovieRequest(BaseModel):
+    name: str
+    genres: list[str]
+    year: int
+    preview: str
+    file: str
+
 class UserRequest(BaseModel):
     user_id: int
