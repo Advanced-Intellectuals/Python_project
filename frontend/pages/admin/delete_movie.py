@@ -4,7 +4,7 @@ def main():
     title_column, exit_button_column = st.columns([6,1])
 
     with title_column:
-        st.title("Загрузка фильма")
+        st.title("Удаление фильма")
     with exit_button_column:
         if st.button("ВЫХОД"):
             st.session_state['logged'] = 0
