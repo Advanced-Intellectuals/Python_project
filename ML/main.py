@@ -62,11 +62,9 @@ async def recommend_user(user_id: int, neighbours: int = 1, films: int = 10):
     """
     try:
         recommendations = await recommender.get_user_recommendations(user_id, neighbours, films)
-        # if not recommendations:
-        #     raise HTTPException(status_code=404, detail="No recommendations found.")
         return {"user_id": user_id, "recommendations": recommendations}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error generating recommendations: {e}")
+        raise HTTPException(status_code=422, detail="No recommendations found.")
 
 @app.get("/recommendations/movie/{movie_id}")
 @cache(expire=3600)
@@ -76,11 +74,9 @@ async def recommend_movie(movie_id: int, k: int = 10):
     """
     try:
         recommendations = recommender.get_movie_recommendations(movie_id, k)
-        # if not recommendations:
-        #     raise HTTPException(status_code=404, detail=f"No similar movies found for '{movie_id}'.")
         return {"movie_id": movie_id, "recommendations": recommendations}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error generating movie recommendations: {e}")
+        raise HTTPException(status_code=422, detail=f"No similar movies found for '{movie_id}'.")
 
 @app.post("/admin/reload")
 async def reload_system():
@@ -91,7 +87,7 @@ async def reload_system():
         await initialize_system()
         return {"message": "System reloaded successfully."}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error reloading system: {e}")
+        raise e
 
 @app.get("/admin/status")
 async def system_status():
@@ -106,7 +102,7 @@ async def system_status():
             "total_movies": len(data.movie_mapper) if isinstance(data, CompactData) else 0
         }
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error fetching system status: {e}")
+        raise e
 
 @app.get("/help")
 async def help():
