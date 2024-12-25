@@ -7,7 +7,7 @@ async def main():
     await data.load_data()
     data.data_preprocessing()
     k = Simple_Recommender(data)
-    a = k.get_movie_recommendations(1)
+    a = k.get_movie_recommendations(2)
     print(a)
 
 # print(Simple_Recommender(data).get_user_recommendations(1, 10, 5))
