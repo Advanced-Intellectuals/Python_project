@@ -123,7 +123,7 @@ class Simple_Recommender:
             # Sort movies by weighted average ratings
             unrated_ratings = average_neighbor_ratings[unrated_movies]
             recommended_movie_indices = np.argsort(-unrated_ratings)  # Descending order
-            recommended_movies = [self.data.index_movie[idx] for idx in recommended_movie_indices]
+            recommended_movies = [self.data.index_movie[idx].item() for idx in recommended_movie_indices]
 
             if films > len(recommended_movies): films = len(recommended_movies)
 
@@ -152,7 +152,7 @@ class Simple_Recommender:
             if k > len(self.data.movie_mapper): k = len(self.data.movie_mapper) - 1
 
             similar_movies_indices = (movie_similarity_scores.flatten().argsort()[::-1])[:k]
-            recommended_movies = [self.data.index_movie[i] for i in similar_movies_indices]
+            recommended_movies = [self.data.index_movie[i].item() for i in similar_movies_indices]
 
             return recommended_movies
         except Exception as e:
