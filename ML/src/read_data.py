@@ -2,8 +2,6 @@ import pandas as pd
 import numpy as np
 from scipy.sparse import csr_matrix
 from src.repository import Repository
-import pickle
-import os
 
 
 class CompactData:
@@ -48,24 +46,12 @@ class CompactData:
             dtype=np.int16
         )
 
-    def save_preprocessed_data(self, path):
-        """Saves preprocessed data to a file for fast future loading."""
-        with open(path, 'wb') as f:
-            pickle.dump((self.user_item_matrix, self.user_mapper, self.movie_mapper, self.index_movie, self.df), f)
-
-    def load_preprocessed_data(self, path):
-        """Loads preprocessed data from a file if it exists."""
-        if os.path.exists(path):
-            with open(path, 'rb') as f:
-                data = pickle.load(f)
-                self.user_mapper = data[1]#data['user_mapper']
-                self.movie_mapper = data[2]#data['movie_mapper']
-                self.index_movie = data[3]#data['index_movie']
-                self.user_item_matrix = data[0]#data['user_item_matrix']
-                self.df = data[4]#data['df']
-            print(f"Preprocessed data loaded from {path}")
-            return True
-        return False
+    async def get_watched_ids(self, user_id):
+        """Возвращает список индексов просмотренных фильмов для данного пользователя."""
+        movie_ids = await self.repo.get_watched(user_id)
+        # Преобразуем ID фильмов в индексы матрицы через movie_mapper
+        watched_indices = [self.movie_mapper[movie_id] for movie_id in movie_ids]
+        return watched_indices
 
     def getcol(self, col):
         """Returns a specific column from the user-item matrix."""

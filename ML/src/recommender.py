@@ -22,7 +22,8 @@ class Simple_Recommender:
             A NumPy array of ratings for the specified user, or None if the user is not found.
           """
         try:
-            user_index = np.float16(self.data.user_mapper[user_id])
+            # user_index = np.int16(self.data.user_mapper[user_id])
+            user_index = user_id
             return self.data.getrow(user_index).toarray()[0].astype(np.float16)
         except KeyError:
             print(f"User with ID {user_id} not found.")
@@ -54,7 +55,10 @@ class Simple_Recommender:
             similarity_scores = cosine_similarity(self.data.user_item_matrix, user_ratings.reshape(1, -1)).flatten().astype(np.float32)
 
             # Exclude the user themselves from the neighbor list
-            similarity_scores[self.data.user_mapper[user_id]] = -2
+            # similarity_scores[self.data.user_mapper[user_id]] = -2
+            similarity_scores[user_id] = -2
+
+            if k > len(self.data.user_mapper): k = len(self.data.user_mapper) - 1
 
             # Get the indices of the top-k most similar users
             nearest_neighbors = similarity_scores.argsort()[::-1][:k]
@@ -72,7 +76,7 @@ class Simple_Recommender:
             print(f"Unexpected error in 'get_k_nearest_neighbors': {e}")
             return None, None
 
-    def get_user_recommendations(self, user_id, neighbours=25, films=24):
+    async def get_user_recommendations(self, user_id, neighbours=25, films=24):
         """
         Recommends movies to a user based on the ratings of their k-nearest neighbors,
         using a weighted average approach where weights are based on similarity.
@@ -86,16 +90,16 @@ class Simple_Recommender:
             list: List of recommended movie titles.
         """
         try:
-            # Get user ratings
-            user_ratings = self.get_user_ratings(user_id)
-            if user_ratings is None:
-                raise ValueError(f"User ID {user_id} not found in the data.")
+            tmp = user_id
+            user_id = self.data.user_mapper.get(user_id, None)
 
-            # If user has no ratings, recommend the most popular movies
-            if np.all(user_ratings == 0):
+            if user_id is None:
                 movie_popularity = self.data.df.groupby('movieId')['rating'].mean().sort_values(ascending=False)
                 recommended_movies = movie_popularity.index.tolist()
                 return recommended_movies[:films]
+
+            # Get user ratings
+            user_ratings = self.get_user_ratings(user_id)
 
             # Find nearest neighbors
             nearest_neighbors, similarity_scores = self.get_k_nearest_neighbors(user_id, neighbours, user_ratings)
@@ -111,13 +115,16 @@ class Simple_Recommender:
             average_neighbor_ratings = weighted_ratings / np.sum(similarity_scores)
 
             # Identify movies the user hasn't rated
-            user_rated_movies = self.data.user_item_matrix[self.data.user_mapper[user_id]].nonzero()[1]
+            # user_rated_movies = self.data.user_item_matrix[self.data.user_mapper[user_id]].nonzero()[1]
+            user_rated_movies = await self.data.get_watched_ids(tmp)
             unrated_movies = np.setdiff1d(np.arange(len(self.data.movie_mapper)), user_rated_movies)
 
             # Sort movies by weighted average ratings
             unrated_ratings = average_neighbor_ratings[unrated_movies]
             recommended_movie_indices = np.argsort(-unrated_ratings)  # Descending order
             recommended_movies = [self.data.index_movie[idx] for idx in recommended_movie_indices]
+
+            if films > len(self.data.movie_mapper): films = len(self.data.movie_mapper)
 
             return recommended_movies[:films]
 
@@ -140,7 +147,10 @@ class Simple_Recommender:
             # Use cosine similarity to find similar movies
             movie_similarity_scores = cosine_similarity(self.data.user_item_matrix.T, self.data.user_item_matrix.T[movie_index])
             movie_similarity_scores[movie_index] = -2
-            similar_movies_indices = movie_similarity_scores.flatten().argsort()[::-1][:k]
+
+            if k > len(self.data.movie_mapper): k = len(self.data.movie_mapper) - 1
+
+            similar_movies_indices = (movie_similarity_scores.flatten().argsort()[::-1])[:k]
             recommended_movies = [self.data.index_movie[i] for i in similar_movies_indices]
 
             return recommended_movies

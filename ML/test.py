@@ -4,8 +4,7 @@ from fastapi_cache.backends.inmemory import InMemoryBackend
 from fastapi_cache.decorator import cache
 from src.read_data import CompactData
 from src.recommender import Simple_Recommender
-from src.repository import Repository
-import os
+from src.scheduler import DataUpdateScheduler
 import logging
 
 # Настройка логирования
@@ -14,32 +13,29 @@ logger = logging.getLogger(__name__)
 
 app = FastAPI()
 
-# Пути к данным и модели
-# DATA_PATH = "data/rating.csv"
-PROCESSED_DATA_PATH = "data/preprocessed_data.pkl"
+
 data = None
 recommender = None
+scheduler = None
 
 async def initialize_system():
     """
     Инициализирует данные и рекомендательную систему.
     """
-    global data, recommender
+    global data, recommender, scheduler
 
-    # Проверяем наличие предварительно обработанных данных
-    if os.path.exists(PROCESSED_DATA_PATH):
-        data = CompactData().load_preprocessed_data(PROCESSED_DATA_PATH)
-        logger.info("Preprocessed data successfully loaded from file.")
-    else:
-
-        data = CompactData()
-        await data.load_data()
-        data.data_preprocessing()
-        data.save_preprocessed_data(PROCESSED_DATA_PATH)
-        logger.info("Data successfully loaded, preprocessed, and saved.")
+    data = CompactData()
+    await data.load_data()
+    data.data_preprocessing()
+    logger.info("Data successfully loaded and preprocessed.")
 
     recommender = Simple_Recommender(data)
     logger.info("Recommender system initialized.")
+
+    # Инициализация и запуск планировщика
+    scheduler = DataUpdateScheduler(data, recommender)
+    scheduler.start()
+    logger.info("Data update scheduler started.")
 
 @app.on_event("startup")
 async def startup_event():
@@ -49,14 +45,23 @@ async def startup_event():
     FastAPICache.init(InMemoryBackend())
     await initialize_system()
 
+@app.on_event("shutdown")
+async def shutdown_event():
+    """
+    Выполняется при остановке приложения.
+    """
+    if scheduler:
+        scheduler.stop()
+        logger.info("Scheduler stopped during shutdown.")
+
 @app.get("/recommendations/user/{user_id}")
 @cache(expire=3600)
-async def recommend_user(user_id: int, neighbours: int = 10, films: int = 10):
+async def recommend_user(user_id: int, neighbours: int = 1, films: int = 10):
     """
     Рекомендует фильмы для пользователя.
     """
     try:
-        recommendations = recommender.get_user_recommendations(user_id, neighbours, films)
+        recommendations = await recommender.get_user_recommendations(user_id, neighbours, films)
         if not recommendations:
             raise HTTPException(status_code=404, detail="No recommendations found.")
         return {"user_id": user_id, "recommendations": recommendations}
@@ -103,31 +108,6 @@ async def system_status():
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error fetching system status: {e}")
 
-@app.post("/admin/save_data")
-async def save_data():
-    """
-    Сохраняет предварительно обработанные данные.
-    """
-    try:
-        data.save_preprocessed_data(PROCESSED_DATA_PATH)
-        return {"message": "Preprocessed data saved successfully."}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error saving preprocessed data: {e}")
-
-@app.post("/admin/clear_data")
-async def clear_data():
-    """
-    Удаляет сохраненные предварительно обработанные данные.
-    """
-    try:
-        if os.path.exists(PROCESSED_DATA_PATH):
-            os.remove(PROCESSED_DATA_PATH)
-            return {"message": "Preprocessed data cleared successfully."}
-        else:
-            raise FileNotFoundError("No preprocessed data to clear.")
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error clearing preprocessed data: {e}")
-
 @app.get("/help")
 async def help():
     """
@@ -145,4 +125,4 @@ async def help():
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=8001)
