@@ -1,4 +1,4 @@
-from src.db import Base
+from backend.db import Base
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import String, BigInteger, ForeignKey, Column, Table, Double
 from sqlalchemy.dialects.postgresql import UUID, ARRAY

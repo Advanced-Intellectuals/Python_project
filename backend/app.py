@@ -117,7 +117,7 @@ class App():
             else:
                 raise HTTPException(status_code=401, detail="Invalid password.")
 
-        @self.__app.get("/recomendations")
+        @self.__app.get("/recommendations")
         async def recommendations(request: Request, response: Response):
 
             session_cookie = request.cookies.get("session")
@@ -130,7 +130,9 @@ class App():
                 raise HTTPException(status_code=401, detail="Invalid or expired session.")
 
             user_id = user_data["user_id"]
-            url = f"http://localhost:8001/recommendations/user/{user_id}"
+
+            base_url = os.getenv("ML_URL")
+            url = f"{base_url}/recommendations/user/{user_id}"
 
             try:
                 api_response = requests.get(url)
@@ -151,7 +153,8 @@ class App():
 
             movie_id = data.movie_id
 
-            url = f"http://localhost:8001/recommendations/movie/{movie_id}"
+            base_url = os.getenv("ML_URL")
+            url = f"{base_url}/recommendations/movie/{movie_id}"
 
             try:
                 api_response = requests.get(url)
