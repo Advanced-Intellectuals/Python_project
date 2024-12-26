@@ -8,7 +8,8 @@ import requests
 
 from services.user import UserService
 from services.movie import MovieService
-from models import LoginRequest, RegisterRequest, MainMoviesRequest, UserRequest, MovieRequest
+from services.score import ScoreService
+from models import LoginRequest, RegisterRequest, MainMoviesRequest, UserRequest, MovieRequest, ScoreRequest
 from models import SearchMoviesRequest, AddMovieRequest
 
 load_dotenv()
@@ -41,7 +42,7 @@ class App():
     __app: FastAPI
     __serializer: Serializer
 
-    def __init__(self, user_service: UserService, movie_service: MovieService):
+    def __init__(self, user_service: UserService, movie_service: MovieService, score_service: ScoreService):
         self.__app = FastAPI()
         self.__serializer = Serializer()
 
@@ -69,8 +70,6 @@ class App():
                 )
             else:
                 raise HTTPException(status_code=401, detail="Invalid password.")
-
-        # тестим (или рефакторим или не используем)
 
         @self.__app.get("/login")
         async def login(request: Request, response: Response):
@@ -102,7 +101,7 @@ class App():
             try:
                 new_user = await user_service.register(user_login, user_password, user_first_name, user_email)
             except Exception as e:
-                HTTPException(status_code=417)
+                raise HTTPException(status_code=417)
 
             if new_user:
                 # создание сессии
@@ -116,8 +115,7 @@ class App():
                     samesite='Lax'  # Ограничение межсайтовых запросов
                 )
             else:
-                raise HTTPException(
-                    status_code=401, detail="Invalid password.")
+                raise HTTPException(status_code=401, detail="Invalid password.")
 
         @self.__app.get("/recomendations")
         async def recommendations(request: Request, response: Response):
@@ -249,6 +247,32 @@ class App():
             except Exception as e:
                 raise HTTPException(status_code=417)
 
+        @self.__app.post("/add_score")
+        async def add_score(request: Request, response: Response, data: ScoreRequest):
+
+            session_cookie = request.cookies.get("session")
+
+            if not session_cookie:
+                raise HTTPException(status_code=401, detail="No session cookie found.")
+
+            user_data = self.__serializer.get_user_data_from_session(session_cookie)
+            if user_data is None:
+                raise HTTPException(status_code=401, detail="Invalid or expired session.")
+
+            user_id = user_data["user_id"]
+            movie_id = data.movie_id
+            score = data.score
+
+            try:
+                result = await score_service.add_score_to_movie(user_id, movie_id, score)
+            except Exception as e:
+                raise HTTPException(status_code=417)
+
+            if result:
+                response.status_code = 201
+                return {"message": "Rating successfully added"}
+            else:
+                raise HTTPException(status_code=417, detail="Cannot add score")
 
     def get_app(self):
         return self.__app
