@@ -160,4 +160,6 @@ class Simple_Recommender:
             return []
 
 class Modern_Recommender:
-    pass
+    def __init__(self, data):
+        self.data = data
+
