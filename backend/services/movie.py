@@ -49,6 +49,9 @@ class MovieService:
 
         await self.movie_repo.add(new_movie)
 
+    async def delete_movie(self, movie_id):
+        await self.movie_repo.delete(movie_id)
+
     async def recommend_movies(self, ids: list[int]):
         movies = await self.movie_repo.get_by_ids(ids)
 

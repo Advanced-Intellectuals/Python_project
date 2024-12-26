@@ -117,7 +117,7 @@ class App():
             else:
                 raise HTTPException(status_code=401, detail="Invalid password.")
 
-        @self.__app.get("/recomendations")
+        @self.__app.get("/recommendations")
         async def recommendations(request: Request, response: Response):
 
             session_cookie = request.cookies.get("session")
@@ -130,7 +130,9 @@ class App():
                 raise HTTPException(status_code=401, detail="Invalid or expired session.")
 
             user_id = user_data["user_id"]
-            url = f"http://localhost:8001/recommendations/user/{user_id}"
+
+            base_url = os.getenv("ML_URL")
+            url = f"{base_url}/recommendations/user/{user_id}"
 
             try:
                 api_response = requests.get(url)
@@ -151,7 +153,8 @@ class App():
 
             movie_id = data.movie_id
 
-            url = f"http://localhost:8001/recommendations/movie/{movie_id}"
+            base_url = os.getenv("ML_URL")
+            url = f"{base_url}/recommendations/movie/{movie_id}"
 
             try:
                 api_response = requests.get(url)
@@ -186,10 +189,23 @@ class App():
         @self.__app.get("/movies/{movie_id}")
         async def movie_by_id(movie_id: int, request: Request, response: Response):
 
+            session_cookie = request.cookies.get("session")
+
+            if not session_cookie:
+                raise HTTPException(status_code=401, detail="No session cookie found.")
+
+            user_data = self.__serializer.get_user_data_from_session(session_cookie)
+            if user_data is None:
+                raise HTTPException(status_code=401, detail="Invalid or expired session.")
+
+            user_id = user_data["user_id"]
+
             try:
                 movie = await movie_service.movie_by_id(movie_id)
             except Exception as e:
                 raise HTTPException(status_code=404, detail="Movie not found")
+
+            await user_service.add_watched(user_id, movie_id)
 
             return movie
 
@@ -246,6 +262,18 @@ class App():
                 return {"message": "Movie successfully created"}
             except Exception as e:
                 raise HTTPException(status_code=417)
+
+        @self.__app.delete("/delete_movie")
+        async def delete_movie(request: Request, response: Response, data: MovieRequest):
+            movie_id = data.movie_id
+
+            try:
+                await movie_service.delete_movie(movie_id)
+
+                response.status_code = 200
+                return {"message": "Movie successfully deleted"}
+            except Exception as e:
+                raise HTTPException(status_code=400, detail="Bad request: Invalid movie ID")
 
         @self.__app.post("/add_score")
         async def add_score(request: Request, response: Response, data: ScoreRequest):

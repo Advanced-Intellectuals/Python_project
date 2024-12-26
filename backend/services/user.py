@@ -44,3 +44,11 @@ class UserService:
             movies = current_user.watched_movies
 
         return movies
+
+    async def add_watched(self, user_id, movie_id):
+        result = await self.user_repo.add_watched(user_id, movie_id)
+
+        if result:
+            return None
+        else:
+            raise HTTPException(status_code=400)
