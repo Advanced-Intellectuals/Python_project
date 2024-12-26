@@ -2,19 +2,31 @@ version: '3.9'
 
 services:
   frontend:
-    build: ./Dockerfile.front
+    image: demo13b/cinema-frontend:latest
+    container_name: cinema-frontend
+    environment:
+      - MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY}
+      - MINIO_SECRET_KEY=${MINIO_SECRET_KEY}
+      - MINIO_ENDPOINT=${MINIO_ENDPOINT}
     ports:
       - 443:443
     restart: on-failure
 
   backend:
-    build: ./Dockerfile.back
+    image: demo13b/cinema-backend:latest
+    container_name: cinema-backend
+    environment:
+      - DB_URL=${DB_URL}
+      - COOKIE_SECRET_KEY=${COOKIE_SECRET_KEY}
     ports:
       - 8000:8000
     restart: on-failure
 
   ML:
-    build: ./Dockerfile.ml
+    image: demo13b/cinema-ml:latest
+    container_name: cinema-ml
+    environment:
+      - DB_URL=${DB_URL}
     ports:
       - 8001:8001
     restart: on-failure

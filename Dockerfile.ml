@@ -11,4 +11,14 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY ./ML/ /app/ML/
 COPY ./.env /app/.env
 
+ENV CERT_PATH=/app/cert/fullchain.pem
+ENV KEY_PATH=/app/cert/private.key
+
+ARG SSL_CERT
+ARG SSL_KEY
+
+RUN mkdir -p /app/cert && \
+    echo "$SSL_KEY" > /app/cert/private.key && \
+    echo "$SSL_CERT" > /app/cert/fullchain.pem
+
 ENTRYPOINT [ "python", "ML/main.py" ]
