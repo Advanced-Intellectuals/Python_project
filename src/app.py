@@ -54,7 +54,7 @@ class App():
             try:
                 user_data = await user_service.login(user_login, user_password)
             except Exception as e:
-                raise e
+                raise HTTPException(status_code=401, detail="Unauthorized")
 
             if user_data:
                 # создание сессии
@@ -68,8 +68,7 @@ class App():
                     samesite='Lax'  # Ограничение межсайтовых запросов
                 )
             else:
-                raise HTTPException(
-                    status_code=401, detail="Invalid password.")
+                raise HTTPException(status_code=401, detail="Invalid password.")
 
         # тестим (или рефакторим или не используем)
 
@@ -165,6 +164,16 @@ class App():
 
             return {"movies": movies}
 
+        @self.__app.get("/movies/{movie_id}")
+        async def movie_by_id(movie_id: int, request: Request, response: Response):
+
+            try:
+                movie = await movie_service.movie_by_id(movie_id)
+            except Exception as e:
+                raise HTTPException(status_code=404, detail="Movie not found")
+
+            return movie
+
         @self.__app.get("/search")
         async def search(request: Request, response: Response, data: SearchMoviesRequest):
 
@@ -199,7 +208,7 @@ class App():
                 )
                 return {"message": "Successfully logged out"}
             except Exception as e:
-                raise HTTPException(status_code=500, detail="Logout failed")
+                raise HTTPException(status_code=401, detail="Logout failed")
 
         @self.__app.post("/add_movie")
         async def add_movie(request: Request, response: Response, data: AddMovieRequest):
@@ -217,7 +226,7 @@ class App():
                 response.status_code = 201
                 return {"message": "Movie successfully created"}
             except Exception as e:
-                raise HTTPException(status_code=500, detail="Failed to add movie")
+                raise e
 
 
     def get_app(self):

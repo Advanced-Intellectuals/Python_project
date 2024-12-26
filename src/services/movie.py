@@ -19,6 +19,20 @@ class MovieService:
 
         return movies
 
+    async def movie_by_id(self, movie_id):
+        movie = await self.movie_repo.get_by_id(movie_id)
+
+        movie = {
+            "movie_id": movie.movie_id,
+            "name": movie.name,
+            "year": movie.year,
+            "file": movie.file,
+            "genres": movie.genres,
+            "preview": movie.preview
+        }
+
+        return movie
+
     async def search_movies(self, searched_title):
         movies = await self.movie_repo.find(searched_title)
 
