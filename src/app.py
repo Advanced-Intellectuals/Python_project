@@ -8,7 +8,7 @@ import requests
 
 from services.user import UserService
 from services.movie import MovieService
-from models import LoginRequest, RegisterRequest, MainMoviesRequest, UserRequest
+from models import LoginRequest, RegisterRequest, MainMoviesRequest, UserRequest, MovieRequest
 from models import SearchMoviesRequest, AddMovieRequest
 
 load_dotenv()
@@ -102,7 +102,7 @@ class App():
             try:
                 new_user = await user_service.register(user_login, user_password, user_first_name, user_email)
             except Exception as e:
-                raise e
+                HTTPException(status_code=417)
 
             if new_user:
                 # создание сессии
@@ -120,7 +120,7 @@ class App():
                     status_code=401, detail="Invalid password.")
 
         @self.__app.get("/recomendations")
-        async def reccomendations(request: Request, response: Response):
+        async def recommendations(request: Request, response: Response):
 
             session_cookie = request.cookies.get("session")
 
@@ -144,7 +144,28 @@ class App():
                 return recommend_movies
             except requests.RequestException as e:
                 raise HTTPException(
-                    status_code=500,
+                    status_code=400,
+                    detail=f"Failed to fetch recommendations: {str(e)}"
+                )
+
+        @self.__app.get("/similar_movies")
+        async def similar_movies(request: Request, response: Response, data: MovieRequest):
+
+            movie_id = data.movie_id
+
+            url = f"http://localhost:8001/recommendations/movie/{movie_id}"
+
+            try:
+                api_response = requests.get(url)
+                api_response.raise_for_status()
+                recommendations = api_response.json()
+
+                recommend_movies = await movie_service.recommend_movies(recommendations["recommendations"])
+
+                return recommend_movies
+            except requests.RequestException as e:
+                raise HTTPException(
+                    status_code=400,
                     detail=f"Failed to fetch recommendations: {str(e)}"
                 )
 
@@ -160,7 +181,7 @@ class App():
             try:
                 movies = await movie_service.main_movies(page_number, page_size, start_year, end_year, genres)
             except Exception as e:
-                raise e
+                raise HTTPException(status_code=417)
 
             return {"movies": movies}
 
@@ -182,7 +203,7 @@ class App():
             try:
                 movies = await movie_service.search_movies(searched)
             except Exception as e:
-                raise e
+                raise HTTPException(status_code=417)
 
             return {"movies": movies}
 
@@ -194,7 +215,7 @@ class App():
             try:
                 movies = await user_service.watched(user_id)
             except Exception as e:
-                raise e
+                raise HTTPException(status_code=417)
 
             return {"movies": movies}
 
@@ -226,7 +247,7 @@ class App():
                 response.status_code = 201
                 return {"message": "Movie successfully created"}
             except Exception as e:
-                raise e
+                raise HTTPException(status_code=417)
 
 
     def get_app(self):

@@ -128,3 +128,6 @@ class AddMovieRequest(BaseModel):
 
 class UserRequest(BaseModel):
     user_id: int
+
+class MovieRequest(BaseModel):
+    movie_id: int
