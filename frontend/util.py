@@ -1,6 +1,7 @@
 import streamlit as st
 import requests
 import os
+import minio_server
 
 DECIPHER_TABLE = {
     "movies": "Главная",
@@ -9,12 +10,12 @@ DECIPHER_TABLE = {
     "watched": "Личный кабинет"
 }
 
-def movie_container(image, text, counter, file_path):
+def movie_container(movie, counter, file_path):
     container = st.container()
     with container:
-        st.image(image, use_container_width=True)
-        if st.button(text, key=counter):
-            st.session_state['watching_movie'] = 1
+        st.image(minio_server.MinioServer().get_object_url(movie["preview"]), use_container_width=True)
+        if st.button(movie["name"], key=counter):
+            st.session_state['watching_movie'] = movie["movie_id"]
             if file_path in DECIPHER_TABLE:
                 st.session_state['previous_page'] = DECIPHER_TABLE[file_path]
             #st.session_state['previous_page'] = DECIPHER_TABLE[file_path]
@@ -38,4 +39,4 @@ def draw_movies(movies, columns_per_row, file_path):
             with col:
                 movie = movies[i + j] if i + j < len(movies) else None
                 if movie:
-                    movie_container(movie["image"], movie["text"], i+j, file_path_changed)
+                    movie_container(movie, i+j, file_path_changed)
