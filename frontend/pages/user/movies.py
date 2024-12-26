@@ -2,14 +2,24 @@ import streamlit as st
 import requests
 from util import draw_movies
 
+
+def go_to_previous_page():
+    if st.session_state.movie_page > 1:
+        st.session_state.movie_page -= 1
+
+
+def go_to_next_page():
+    st.session_state.movie_page += 1
+
+
 def main():
     API_URL = "http://127.0.0.1:8000/movies"
 
-    movie_grid, params = st.columns([6, 1])
+    movie_grid, params = st.columns([5, 1])
 
     with params:
         st.write("Дата выхода фильма")
-        date1, symb, date2 = st.columns([2,1,2], vertical_alignment="bottom")
+        date1, symb, date2 = st.columns([2, 1, 2], vertical_alignment="bottom")
 
         with date1:
             number1 = st.number_input("ОТ:", value=1900, step=1)
@@ -26,14 +36,13 @@ def main():
     if number1 and number2:
         with movie_grid:
             try:
-                response = requests.post(API_URL, json={"page_number": st.session_state['movie_page'], 
-                                                                "page_size": 30,
-                                                                "start_year": number1,
-                                                                "end_year": number2,
-                                                                "genres": selected_options})
+                response = requests.get(API_URL, json={"page_number": st.session_state['movie_page'],
+                                                       "start_year": number1,
+                                                       "end_year": number2,
+                                                       "genres": selected_options})
                 if response.status_code == 200:
-                        draw_movies(response['movies'], 6, __file__)
-                        st.rerun()
+                    body = response.json()
+                    draw_movies(body['movies'], 6, __file__)
                 else:
                     st.error("Неправильные параметры.")
             except Exception as e:
@@ -41,15 +50,6 @@ def main():
 
     page_button_cont1, page_button_cont2 = st.columns(2)
     with page_button_cont1:
-        if st.button("Предыдущая страница"):
-            if st.session_state['movie_page'] != 0:
-                st.session_state['movie_page'] = st.session_state['movie_page']-1
-            else:
-                st.warning("Начальная страница")
+        st.button("Предыдущая страница", on_click=go_to_previous_page)
     with page_button_cont2:
-        if st.button("Следующая страница"):
-            st.session_state['movie_page'] = st.session_state['movie_page']+1
-            
-
-if __name__ == "__main__":
-    main()
+        st.button("Следующая страница", on_click=go_to_next_page)

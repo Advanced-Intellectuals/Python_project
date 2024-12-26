@@ -62,3 +62,8 @@ typing_extensions==4.12.2
 tzdata==2024.2
 urllib3==2.2.3
 uvicorn==0.34.0
+scipy
+scikit-learn
+apscheduler
+logging
+fastapi-cache2

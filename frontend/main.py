@@ -32,6 +32,7 @@ if 'movie_page' not in st.session_state:
 if 'previous_page' not in st.session_state:
     st.session_state['previous_page'] = list(USER_TABLE.keys())[0]
 
+
 def main():
     if st.session_state['logged'] == 0:
         if st.session_state['auth_page'] == 'login':
@@ -48,6 +49,7 @@ def main():
     elif st.session_state['logged'] == 2:
         page = st.sidebar.radio("Выберите", list(ADMIN_TABLE.keys()))
         ADMIN_TABLE[page].main()
+
 
 if __name__ == "__main__":
     main()

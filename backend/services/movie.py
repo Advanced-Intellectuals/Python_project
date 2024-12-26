@@ -3,6 +3,7 @@ from types import new_class
 from fastapi import HTTPException
 from repository.movies import MovieRepo, Movie
 
+
 class MovieService:
     def __init__(self, movie_repo: MovieRepo):
         self.movie_repo = movie_repo
