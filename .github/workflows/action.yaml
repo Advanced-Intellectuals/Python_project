@@ -101,7 +101,7 @@ jobs:
       - name: SSH into server and deploy using Docker Compose
         run: |
           ssh -o StrictHostKeyChecking=no -p 2225 tim@185.105.91.138 "
+            cd Movies &&
             docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD}} &&
-            cd Cinema &&
             docker-compose pull &&
             docker-compose up -d --build"
