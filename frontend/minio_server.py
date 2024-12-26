@@ -11,10 +11,10 @@ class MinioServer():
 
     def __init__(self):
         self.__minio_client = Minio(
-            '185.105.91.138:9000',
+            os.getenv('MINIO_ENDPOINT'),
             access_key=os.getenv('MINIO_ACCESS_KEY'),
             secret_key=os.getenv('MINIO_SECRET_KEY'),
-            secure=False
+            secure=True
         )
         self.__bucket_name = "online.cinema"
 
