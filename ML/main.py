@@ -2,7 +2,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi_cache import FastAPICache
 from fastapi_cache.backends.inmemory import InMemoryBackend
 from fastapi_cache.decorator import cache
-from src.read_data import CompactData
+from src.read_data import SimpleCompactData
 from src.recommender import Simple_Recommender
 from src.scheduler import DataUpdateScheduler
 import uvicorn
@@ -26,9 +26,9 @@ app = FastAPI()
 # )
 
 
-data = None
-recommender = None
-scheduler = None
+data: SimpleCompactData | None = None
+recommender: Simple_Recommender | None = None
+scheduler: DataUpdateScheduler | None = None
 
 
 async def initialize_system():
@@ -37,7 +37,7 @@ async def initialize_system():
     """
     global data, recommender, scheduler
 
-    data = CompactData()
+    data = SimpleCompactData()
     await data.load_data()
     data.data_preprocessing()
     logger.info("Data successfully loaded and preprocessed.")
@@ -120,8 +120,8 @@ async def system_status():
         return {
             "data_loaded": (data is not None),
             "model_loaded": (recommender is not None),
-            "total_users": len(data.user_mapper) if isinstance(data, CompactData) else 0,
-            "total_movies": len(data.movie_mapper) if isinstance(data, CompactData) else 0
+            "total_users": len(data.user_mapper) if isinstance(data, SimpleCompactData) else 0,
+            "total_movies": len(data.movie_mapper) if isinstance(data, SimpleCompactData) else 0
         }
     except Exception as e:
         raise HTTPException(
@@ -138,8 +138,6 @@ async def help():
         "/recommendations/movie/{movie_title}": "Recommends similar movies",
         "/admin/reload": "Reloads the system",
         "/admin/status": "Returns system status",
-        "/admin/save_data": "Saves preprocessed data",
-        "/admin/clear_data": "Clears preprocessed data",
         "/help": "Provides information about available endpoints"
     }
 

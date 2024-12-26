@@ -1,6 +1,6 @@
 from sklearn.metrics.pairwise import cosine_similarity
 import numpy as np
-from src.read_data import CompactData
+from src.read_data import SimpleCompactData
 
 class Simple_Recommender:
 
@@ -8,7 +8,7 @@ class Simple_Recommender:
     Recommends movies to users based on their ratings and the ratings of their k-nearest neighbors.
     """
 
-    def __init__(self, data:CompactData):
+    def __init__(self, data:SimpleCompactData):
         self.data = data
 
     def get_user_ratings(self, user_id):

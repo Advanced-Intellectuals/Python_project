@@ -4,7 +4,7 @@ from scipy.sparse import csr_matrix
 from src.repository import Repository
 
 
-class CompactData:
+class SimpleCompactData:
 
     """
     Class representing compact data for recommendation system.
@@ -43,7 +43,7 @@ class CompactData:
         self.user_item_matrix = csr_matrix(
             (ratings, (self.df['user_index'], self.df['movie_index'])),
             shape=(len(users), len(movies)),
-            dtype=np.int16
+            dtype=np.float32
         )
 
     async def get_watched_ids(self, user_id):
