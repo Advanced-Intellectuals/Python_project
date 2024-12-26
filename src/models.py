@@ -110,14 +110,17 @@ class RegisterRequest(BaseModel):
     register_first_name: str
     register_email: str
 
+
 class MainMoviesRequest(BaseModel):
     page_number: int
     start_year: Optional[int] = None
     end_year: Optional[int] = None
     genres: Optional[list[str]] = None
 
+
 class SearchMoviesRequest(BaseModel):
     searched_title: str
+
 
 class AddMovieRequest(BaseModel):
     name: str
@@ -125,6 +128,7 @@ class AddMovieRequest(BaseModel):
     year: int
     preview: str
     file: str
+
 
 class UserRequest(BaseModel):
     user_id: int
