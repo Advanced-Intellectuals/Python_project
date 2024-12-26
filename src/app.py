@@ -247,6 +247,18 @@ class App():
             except Exception as e:
                 raise HTTPException(status_code=417)
 
+        @self.__app.delete("/delete_movie")
+        async def delete_movie(request: Request, response: Response, data: MovieRequest):
+            movie_id = data.movie_id
+
+            try:
+                await movie_service.delete_movie(movie_id)
+
+                response.status_code = 200
+                return {"message": "Movie successfully deleted"}
+            except Exception as e:
+                raise HTTPException(status_code=400, detail="Bad request: Invalid movie ID")
+
         @self.__app.post("/add_score")
         async def add_score(request: Request, response: Response, data: ScoreRequest):
 
