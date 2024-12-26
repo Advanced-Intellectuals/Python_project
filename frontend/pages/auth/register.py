@@ -14,7 +14,7 @@ def main():
     if st.button("Зарегистрироваться"):
         if username and password:
             try:
-                response = requests.post(API_URL, json={"register_first_name": name, "register_email": email, "register_login": username, "register_password": password})
+                response = requests.post(API_URL, json={"register_first_name": name, "register_email": email, "register_login": username, "register_password_hash": password})
                 if response.status_code == 200:
                     st.success("Регистрация успешна!")
                     st.session_state['logged'] = 1

@@ -18,7 +18,7 @@ ADMIN_TABLE = {
 }
 
 if 'logged' not in st.session_state:
-    st.session_state['logged'] = 1
+    st.session_state['logged'] = 0
 
 if 'auth_page' not in st.session_state:
     st.session_state['auth_page'] = 'login'
@@ -27,7 +27,7 @@ if 'watching_movie' not in st.session_state:
     st.session_state['watching_movie'] = 0
 
 if 'movie_page' not in st.session_state:
-    st.session_state['movie_page'] = 0
+    st.session_state['movie_page'] = 1
 
 if 'previous_page' not in st.session_state:
     st.session_state['previous_page'] = list(USER_TABLE.keys())[0]

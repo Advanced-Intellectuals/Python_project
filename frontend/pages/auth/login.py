@@ -12,7 +12,7 @@ def main():
     if st.button("Войти"):
         if username and password:
             try:
-                response = requests.post(API_URL, json={"login": username, "password": password})
+                response = requests.post(API_URL, json={"user_login": username, "user_password": password})
                 if response.status_code == 200:
                     st.success("Вы совершили вход!")
                     st.session_state['logged'] = 1
