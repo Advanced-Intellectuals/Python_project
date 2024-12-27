@@ -1,0 +1,58 @@
+version: '3.9'
+
+services:
+  frontend:
+    image: demo13b/cinema-frontend:latest
+    container_name: cinema-frontend
+    environment:
+      - MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY}
+      - MINIO_SECRET_KEY=${MINIO_SECRET_KEY}
+      - MINIO_ENDPOINT=${MINIO_ENDPOINT}
+      - BACK_URL=${BACK_URL}
+    ports:
+      - 443:443
+    restart: on-failure
+
+  backend:
+    image: demo13b/cinema-backend:latest
+    container_name: cinema-backend
+    environment:
+      - DB_URL=${DB_URL}
+      - COOKIE_SECRET_KEY=${COOKIE_SECRET_KEY}
+      - ML_URL=${ML_URL}
+    ports:
+      - 8000:8000
+    restart: on-failure
+
+  ML:
+    image: demo13b/cinema-ml:latest
+    container_name: cinema-ml
+    environment:
+      - DB_URL=${DB_URL}
+    ports:
+      - 8001:8001
+    restart: on-failure
+
+  postgres:
+    image: postgres:16.4-alpine3.20
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "23240:5432"
+    volumes:
+      - ./postgres_data:/var/lib/postgresql/data
+
+  minio:
+    image: quay.io/minio/minio:latest
+    ports:
+      - '9000:9000'
+      - '9001:9001'
+    volumes:
+      - ./minio_data:/data
+      - ./minio_data/.minio:/root/.minio
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    command: minio server /data --console-address :9001

@@ -1,0 +1,24 @@
+FROM python:3.12.6-slim
+
+WORKDIR /app
+
+RUN apt update && apt upgrade -y
+RUN pip install --upgrade pip
+
+COPY ./requirements.txt /app/requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY ./frontend/ /app/frontend/
+COPY ./.env /app/.env
+
+ENV CERT_PATH=/app/cert/fullchain.pem
+ENV KEY_PATH=/app/cert/private.key
+
+ARG SSL_CERT
+ARG SSL_KEY
+
+RUN mkdir -p /app/cert && \
+    echo "$SSL_KEY" > /app/cert/private.key && \
+    echo "$SSL_CERT" > /app/cert/fullchain.pem
+
+ENTRYPOINT [ "streamlit", "run", "frontend/main.py", "--server.port=443", "--server.headless", "true"]

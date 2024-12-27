@@ -1,0 +1,107 @@
+name: publish
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-push-backend:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build Docker image
+        run: |
+          docker build \
+            --build-arg SSL_CERT=${{ secrets.SSL_CERT }} \
+            --build-arg SSL_KEY=${{ secrets.SSL_KEY }} \
+            -f Dockerfile.back \
+            -t ${{ secrets.DOCKER_USERNAME }}/cinema-backend \
+            .
+      
+      - name: Push Docker image
+        run: |
+          docker push ${{ secrets.DOCKER_USERNAME }}/cinema-backend
+
+    
+  build-and-push-frontend:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build Docker image
+        run: |
+          docker build \
+            --build-arg SSL_CERT=${{ secrets.SSL_CERT }} \
+            --build-arg SSL_KEY=${{ secrets.SSL_KEY }} \
+            -f Dockerfile.front \
+            -t ${{ secrets.DOCKER_USERNAME }}/cinema-frontend \
+            .
+      
+      - name: Push Docker image
+        run: |
+          docker push ${{ secrets.DOCKER_USERNAME }}/cinema-frontend
+  
+
+  build-and-push-ml:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build Docker image
+        run: |
+          docker build \
+            --build-arg SSL_CERT=${{ secrets.SSL_CERT }} \
+            --build-arg SSL_KEY=${{ secrets.SSL_KEY }} \
+            -f Dockerfile.ml \
+            -t ${{ secrets.DOCKER_USERNAME }}/cinema-ml \
+            .
+      
+      - name: Push Docker image
+        run: |
+          docker push ${{ secrets.DOCKER_USERNAME }}/cinema-ml
+
+
+  deploy-to-server:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up SSH key
+        uses: webfactory/ssh-agent@v0.5.3
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: SSH into server and deploy using Docker Compose
+        run: |
+          ssh -o StrictHostKeyChecking=no -p 2225 tim@185.105.91.138 "
+            cd Movies &&
+            docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD}} &&
+            docker-compose pull &&
+            docker-compose up -d --build"
