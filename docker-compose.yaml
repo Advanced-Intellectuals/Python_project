@@ -8,6 +8,7 @@ services:
       - MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY}
       - MINIO_SECRET_KEY=${MINIO_SECRET_KEY}
       - MINIO_ENDPOINT=${MINIO_ENDPOINT}
+      - BACK_URL=${BACK_URL}
     ports:
       - 443:443
     restart: on-failure
@@ -18,6 +19,7 @@ services:
     environment:
       - DB_URL=${DB_URL}
       - COOKIE_SECRET_KEY=${COOKIE_SECRET_KEY}
+      - ML_URL=${ML_URL}
     ports:
       - 8000:8000
     restart: on-failure

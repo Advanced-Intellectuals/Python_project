@@ -19,11 +19,11 @@ logger = logging.getLogger(__name__)
 
 app = FastAPI()
 
-# ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
-# ssl_context.load_cert_chain(
-#     os.getenv("CERT_PATH"),
-#     keyfile=os.getenv("KEY_PATH")
-# )
+ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+ssl_context.load_cert_chain(
+    os.getenv("CERT_PATH"),
+    keyfile=os.getenv("KEY_PATH")
+)
 
 
 data: SimpleCompactData | None = None
@@ -142,4 +142,4 @@ async def help():
     }
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8001)
+    uvicorn.run(app, host="0.0.0.0", port=8001, ssl=ssl_context)
