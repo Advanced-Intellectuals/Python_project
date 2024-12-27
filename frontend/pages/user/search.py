@@ -1,35 +1,24 @@
 import streamlit as st
-import requests
+import os
 from util import draw_movies
 
-movies = [
-    {"image": "https://cdn11.bigcommerce.com/s-ydriczk/images/stencil/1500x1500/products/90301/98769/the-creator-original-movie-poster-one-sheet-final-style-buy-now-at-starstills__81077.1697644483.jpg?c=2&imbypass=on", "text": "Movie 1: A thrilling adventure."},
-    {"image": "https://cdn11.bigcommerce.com/s-ydriczk/images/stencil/1500x1500/products/90301/98769/the-creator-original-movie-poster-one-sheet-final-style-buy-now-at-starstills__81077.1697644483.jpg?c=2&imbypass=on", "text": "Movie 1: A thrilling adventure."},
-    {"image": "https://cdn11.bigcommerce.com/s-ydriczk/images/stencil/1500x1500/products/90301/98769/the-creator-original-movie-poster-one-sheet-final-style-buy-now-at-starstills__81077.1697644483.jpg?c=2&imbypass=on", "text": "Movie 1: A thrilling adventure."},
-    {"image": "https://cdn11.bigcommerce.com/s-ydriczk/images/stencil/1500x1500/products/90301/98769/the-creator-original-movie-poster-one-sheet-final-style-buy-now-at-starstills__81077.1697644483.jpg?c=2&imbypass=on", "text": "Movie 1: A thrilling adventure."},
-    {"image": "https://cdn11.bigcommerce.com/s-ydriczk/images/stencil/1500x1500/products/90301/98769/the-creator-original-movie-poster-one-sheet-final-style-buy-now-at-starstills__81077.1697644483.jpg?c=2&imbypass=on", "text": "Movie 1: A thrilling adventure."},
-    {"image": "https://cdn11.bigcommerce.com/s-ydriczk/images/stencil/1500x1500/products/90301/98769/the-creator-original-movie-poster-one-sheet-final-style-buy-now-at-starstills__81077.1697644483.jpg?c=2&imbypass=on", "text": "Movie 1: A thrilling adventure."},
-    {"image": "https://cdn11.bigcommerce.com/s-ydriczk/images/stencil/1500x1500/products/90301/98769/the-creator-original-movie-poster-one-sheet-final-style-buy-now-at-starstills__81077.1697644483.jpg?c=2&imbypass=on", "text": "Movie 1: A thrilling adventure."},
-    {"image": "https://cdn11.bigcommerce.com/s-ydriczk/images/stencil/1500x1500/products/90301/98769/the-creator-original-movie-poster-one-sheet-final-style-buy-now-at-starstills__81077.1697644483.jpg?c=2&imbypass=on", "text": "Movie 1: A thrilling adventure."}
-]
 
 def main():
-    API_URL = "http://127.0.0.1:8000/search"
+    st.session_state.search_url = f"{os.getenv('BACK_URL')}/search"
 
-    search_bar_column, search_button_column = st.columns([4,1], vertical_alignment="bottom")
-    
+    search_bar_column, search_button_column = st.columns(
+        [4, 1], vertical_alignment="bottom")
+
     with search_bar_column:
-        search_bar = st.text_input("Введите название фильма:")
-    with search_button_column:
-        search_button = st.button("Искать")
-
-    draw_movies(movies, 6, __file__)
-    #if search_button:
-        #if search_bar:
-    
-
-        #else:
-        #    st.warning("Введите название!")
-
-if __name__ == "__main__":
-    main()
+        st.session_state.search_bar = st.text_input("Введите название фильма:")
+    if (st.session_state.search_bar):
+        try:
+            response = st.session_state.session.get(
+                st.session_state.search_url, json={"searched_title": st.session_state.search_bar})
+            if response.status_code == 200:
+                body = response.json()
+                draw_movies(body['movies'], 6, __file__)
+            else:
+                st.error("Неправильные параметры.")
+        except Exception as e:
+            st.error(f"Ошибка подключения: {e}")

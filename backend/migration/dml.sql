@@ -1,5 +1,5 @@
 -- User insert example
-INSERT INTO users (login, password_hash, first_name, email)
+INSERT INTO users (login, password_hash, role, first_name, email)
 VALUES ('tsalikhov', '$2b$10$OwmvNOfj1/r6L02v8Y.tdexuiOvoEeUzCZ/iyM4Njy7.q6DPml1rG', 'admin', 'Tim', 'tim@mai.ru')
 
 -- Movies insert example

@@ -3,6 +3,7 @@ from types import new_class
 from fastapi import HTTPException
 from repository.movies import MovieRepo, Movie
 
+
 class MovieService:
     def __init__(self, movie_repo: MovieRepo):
         self.movie_repo = movie_repo
@@ -19,6 +20,20 @@ class MovieService:
 
         return movies
 
+    async def movie_by_id(self, movie_id):
+        movie = await self.movie_repo.get_by_id(movie_id)
+
+        movie = {
+            "movie_id": movie.movie_id,
+            "name": movie.name,
+            "year": movie.year,
+            "file": movie.file,
+            "genres": movie.genres,
+            "preview": movie.preview
+        }
+
+        return movie
+
     async def search_movies(self, searched_title):
         movies = await self.movie_repo.find(searched_title)
 
@@ -34,6 +49,9 @@ class MovieService:
         new_movie.file = file
 
         await self.movie_repo.add(new_movie)
+
+    async def delete_movie(self, movie_id):
+        await self.movie_repo.delete(movie_id)
 
     async def recommend_movies(self, ids: list[int]):
         movies = await self.movie_repo.get_by_ids(ids)

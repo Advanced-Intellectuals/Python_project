@@ -2,6 +2,12 @@ import streamlit as st
 from pages.user import movies, recommendations, watched, search, movie
 from pages.auth import login, register
 from pages.admin import add_movie, delete_movie
+import requests
+import os
+from dotenv import load_dotenv
+from minio_server import MinioServer
+
+load_dotenv()
 
 st.set_page_config(layout="wide")
 
@@ -18,7 +24,7 @@ ADMIN_TABLE = {
 }
 
 if 'logged' not in st.session_state:
-    st.session_state['logged'] = 1
+    st.session_state['logged'] = 0
 
 if 'auth_page' not in st.session_state:
     st.session_state['auth_page'] = 'login'
@@ -26,8 +32,20 @@ if 'auth_page' not in st.session_state:
 if 'watching_movie' not in st.session_state:
     st.session_state['watching_movie'] = 0
 
+if 'movie_page' not in st.session_state:
+    st.session_state['movie_page'] = 1
+
 if 'previous_page' not in st.session_state:
     st.session_state['previous_page'] = list(USER_TABLE.keys())[0]
+
+if 'session' not in st.session_state:
+    st.session_state['session'] = requests.Session()
+
+if 'api_url' not in st.session_state:
+    st.session_state['api_url'] = f"{os.getenv('BACK_URL')}/login"
+
+if 'minio_server' not in st.session_state:
+    st.session_state['minio_server'] = MinioServer()
 
 
 def main():
@@ -42,7 +60,7 @@ def main():
                 USER_TABLE.keys()).index(st.session_state['previous_page']))
             USER_TABLE[page].main()
         else:
-            movie.main()
+            movie.movie(st.session_state['watching_movie'])
     elif st.session_state['logged'] == 2:
         page = st.sidebar.radio("Выберите", list(ADMIN_TABLE.keys()))
         ADMIN_TABLE[page].main()

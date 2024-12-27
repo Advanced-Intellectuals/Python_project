@@ -7,3 +7,4 @@ ML/data
 test.json
 .coverage
 preprocessed_data.pkl
+tmp

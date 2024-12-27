@@ -1,40 +1,60 @@
 import streamlit as st
 import requests
 from util import draw_movies
+import os
 
-movies = [
-    {"image": "https://cdn11.bigcommerce.com/s-ydriczk/images/stencil/1500x1500/products/90301/98769/the-creator-original-movie-poster-one-sheet-final-style-buy-now-at-starstills__81077.1697644483.jpg?c=2&imbypass=on", "text": "Movie 1: A thrilling adventure."},
-    {"image": "https://cdn11.bigcommerce.com/s-ydriczk/images/stencil/1500x1500/products/90301/98769/the-creator-original-movie-poster-one-sheet-final-style-buy-now-at-starstills__81077.1697644483.jpg?c=2&imbypass=on", "text": "Movie 1: A thrilling adventure."},
-    {"image": "https://cdn11.bigcommerce.com/s-ydriczk/images/stencil/1500x1500/products/90301/98769/the-creator-original-movie-poster-one-sheet-final-style-buy-now-at-starstills__81077.1697644483.jpg?c=2&imbypass=on", "text": "Movie 1: A thrilling adventure."},
-    {"image": "https://cdn11.bigcommerce.com/s-ydriczk/images/stencil/1500x1500/products/90301/98769/the-creator-original-movie-poster-one-sheet-final-style-buy-now-at-starstills__81077.1697644483.jpg?c=2&imbypass=on", "text": "Movie 1: A thrilling adventure."},
-    {"image": "https://cdn11.bigcommerce.com/s-ydriczk/images/stencil/1500x1500/products/90301/98769/the-creator-original-movie-poster-one-sheet-final-style-buy-now-at-starstills__81077.1697644483.jpg?c=2&imbypass=on", "text": "Movie 1: A thrilling adventure."},
-    {"image": "https://cdn11.bigcommerce.com/s-ydriczk/images/stencil/1500x1500/products/90301/98769/the-creator-original-movie-poster-one-sheet-final-style-buy-now-at-starstills__81077.1697644483.jpg?c=2&imbypass=on", "text": "Movie 1: A thrilling adventure."},
-    {"image": "https://cdn11.bigcommerce.com/s-ydriczk/images/stencil/1500x1500/products/90301/98769/the-creator-original-movie-poster-one-sheet-final-style-buy-now-at-starstills__81077.1697644483.jpg?c=2&imbypass=on", "text": "Movie 1: A thrilling adventure."},
-    {"image": "https://cdn11.bigcommerce.com/s-ydriczk/images/stencil/1500x1500/products/90301/98769/the-creator-original-movie-poster-one-sheet-final-style-buy-now-at-starstills__81077.1697644483.jpg?c=2&imbypass=on", "text": "Movie 1: A thrilling adventure."}
-]
 
-def main():
-    API_URL = "http://127.0.0.1:8000/movie"
+def movie(movie_id):
+    API_URL_MOVIE = f"{os.getenv('BACK_URL')}/movies/{movie_id}"
+    API_URL_SCORE = f"{os.getenv('BACK_URL')}/add_score"
+    API_URL_RECS = f"{os.getenv('BACK_URL')}/similar_movies"
 
     if st.button("К фильмам"):
         st.session_state['watching_movie'] = 0
         st.rerun()
-    
-    movie_info, video = st.columns([1,3])
-    with movie_info:
-        st.image('https://cdn11.bigcommerce.com/s-ydriczk/images/stencil/1500x1500/products/90301/98769/the-creator-original-movie-poster-one-sheet-final-style-buy-now-at-starstills__81077.1697644483.jpg?c=2&imbypass=on')
-        st.write('Название')
-        st.write('Год')
-        genres = ['А','Б','В']
-        st.write(", ".join(map(str, genres)))
-    with video:
-        st.video('https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.youtube.com%2Fwatch%3Fv%3DknRAM6AHcKI&psig=AOvVaw3_dWJFpuI3mYjZzu6xCUlp&ust=1735054361132000&source=images&cd=vfe&opi=89978449&ved=0CBcQjhxqFwoTCKDnlqmbvooDFQAAAAAdAAAAABAE')
-    selecter, _ = st.columns([1,5])
-    with selecter:
-        selected_value = st.selectbox('Поставьте оценку:', range(1, 11),)
-    st.write('Ваша оценка: ', selected_value)
-    st.title('Также смотрят:')
-    draw_movies(movies, 5, __file__)
 
-if __name__ == "__main__":
-    main()
+    movie_info, video = st.columns([1, 3])
+    with movie_info:
+        try:
+            response = st.session_state.session.get(API_URL_MOVIE)
+            if response.status_code == 200:
+                movie = response.json()
+                st.image(st.session_state.minio_server.get_object_url(
+                    movie["preview"]), use_container_width=True)
+                st.write(movie["name"])
+                st.write(movie["year"])
+                st.write(", ".join(map(str, movie["genres"])))
+            else:
+                st.error("Ошибка запроса.")
+        except Exception as e:
+            st.error(f"Ошибка подключения: {e}")
+    with video:
+        st.video(st.session_state.minio_server.get_object_url(
+            movie["file"]))
+    selecter, _ = st.columns([1, 5])
+    with selecter:
+        selected_value = st.selectbox('Поставьте оценку:', range(1, 11))
+        if (st.button('Поставить')):
+            try:
+                response = st.session_state.session.post(
+                    API_URL_SCORE, json={"movie_id": movie_id, "score": selected_value})
+                if response.status_code == 201:
+                    st.success("Оценка поставлена!")
+                else:
+                    st.error("Ошибка запроса.")
+            except Exception as e:
+                st.error(f"Ошибка подключения: {e}")
+
+    st.title('Также смотрят:')
+
+    try:
+        response = st.session_state.session.get(
+            API_URL_RECS, json={'movie_id': movie_id})
+        if response.status_code == 200:
+            body = response.json()
+            draw_movies(body, 5, __file__)
+        else:
+            st.error("Ошибка запроса.")
+            st.error(response.json())
+    except Exception as e:
+        st.error(f"Ошибка подключения: {e}")

@@ -1,32 +1,28 @@
 import streamlit as st
-import requests
 from util import draw_movies
+import os
 
-movies = [
-    {"image": "https://cdn11.bigcommerce.com/s-ydriczk/images/stencil/1500x1500/products/90301/98769/the-creator-original-movie-poster-one-sheet-final-style-buy-now-at-starstills__81077.1697644483.jpg?c=2&imbypass=on", "text": "Movie 1: A thrilling adventure."},
-    {"image": "https://cdn11.bigcommerce.com/s-ydriczk/images/stencil/1500x1500/products/90301/98769/the-creator-original-movie-poster-one-sheet-final-style-buy-now-at-starstills__81077.1697644483.jpg?c=2&imbypass=on", "text": "Movie 1: A thrilling adventure."},
-    {"image": "https://cdn11.bigcommerce.com/s-ydriczk/images/stencil/1500x1500/products/90301/98769/the-creator-original-movie-poster-one-sheet-final-style-buy-now-at-starstills__81077.1697644483.jpg?c=2&imbypass=on", "text": "Movie 1: A thrilling adventure."},
-    {"image": "https://cdn11.bigcommerce.com/s-ydriczk/images/stencil/1500x1500/products/90301/98769/the-creator-original-movie-poster-one-sheet-final-style-buy-now-at-starstills__81077.1697644483.jpg?c=2&imbypass=on", "text": "Movie 1: A thrilling adventure."},
-    {"image": "https://cdn11.bigcommerce.com/s-ydriczk/images/stencil/1500x1500/products/90301/98769/the-creator-original-movie-poster-one-sheet-final-style-buy-now-at-starstills__81077.1697644483.jpg?c=2&imbypass=on", "text": "Movie 1: A thrilling adventure."},
-    {"image": "https://cdn11.bigcommerce.com/s-ydriczk/images/stencil/1500x1500/products/90301/98769/the-creator-original-movie-poster-one-sheet-final-style-buy-now-at-starstills__81077.1697644483.jpg?c=2&imbypass=on", "text": "Movie 1: A thrilling adventure."},
-    {"image": "https://cdn11.bigcommerce.com/s-ydriczk/images/stencil/1500x1500/products/90301/98769/the-creator-original-movie-poster-one-sheet-final-style-buy-now-at-starstills__81077.1697644483.jpg?c=2&imbypass=on", "text": "Movie 1: A thrilling adventure."},
-    {"image": "https://cdn11.bigcommerce.com/s-ydriczk/images/stencil/1500x1500/products/90301/98769/the-creator-original-movie-poster-one-sheet-final-style-buy-now-at-starstills__81077.1697644483.jpg?c=2&imbypass=on", "text": "Movie 1: A thrilling adventure."}
-]
+
+def go_to_previous_page():
+    if st.session_state.movie_page > 1:
+        st.session_state.movie_page -= 1
+
+
+def go_to_next_page():
+    st.session_state.movie_page += 1
+
 
 def main():
-    API_URL = "http://127.0.0.1:8000/movies"
+    API_URL = f"{os.getenv('BACK_URL')}/movies"
 
-    movie_grid, params = st.columns([6, 1])
-
-    with movie_grid:
-        draw_movies(movies, 6, __file__)
+    movie_grid, params = st.columns([5, 1])
 
     with params:
         st.write("Дата выхода фильма")
-        date1, symb, date2 = st.columns([2,1,2], vertical_alignment="bottom")
+        date1, symb, date2 = st.columns([2, 1, 2], vertical_alignment="bottom")
 
         with date1:
-            number1 = st.number_input("ОТ:", value=1980, step=1)
+            number1 = st.number_input("ОТ:", value=1900, step=1)
 
         with symb:
             st.write("--")
@@ -34,22 +30,29 @@ def main():
         with date2:
             number2 = st.number_input("ДО:", value=2024, step=1)
 
-        options = ["Option 1", "Option 2", "Option 3"]
-        selected_options = st.multiselect("Жанры:", options)
-        if st.button("Применить"):
-            if selected_options and date1 and date2:
-                st.write("Будет применён фильтр")
-            else:
-                st.warning("Сначала заполните поля!")
+        options = ['Adventure', 'Animation', 'Children', 'Comedy', 'Fantasy', 'Romance', 'Drama',
+                   'Action', 'Crime', 'Thriller', 'Horror', 'Mystery', 'Sci-Fi', 'War', 'Musical',
+                   'Documentary', 'IMAX', 'Western', 'Film-Noir']
 
+        selected_options = st.multiselect("Жанры:", options)
+
+    if number1 and number2:
+        with movie_grid:
+            try:
+                response = st.session_state.session.get(API_URL, json={"page_number": st.session_state['movie_page'],
+                                                                       "start_year": number1,
+                                                                       "end_year": number2,
+                                                                       "genres": selected_options})
+                if response.status_code == 200:
+                    body = response.json()
+                    draw_movies(body['movies'], 5, __file__)
+                else:
+                    st.error("Неправильные параметры.")
+            except Exception as e:
+                st.error(f"Ошибка подключения: {e}")
 
     page_button_cont1, page_button_cont2 = st.columns(2)
     with page_button_cont1:
-        if st.button("Предыдущая страница"):
-            st.write("Переход назад")
+        st.button("Предыдущая страница", on_click=go_to_previous_page)
     with page_button_cont2:
-        if st.button("Следующая страница"):
-            st.write("Переход вперёд")
-
-if __name__ == "__main__":
-    main()
+        st.button("Следующая страница", on_click=go_to_next_page)

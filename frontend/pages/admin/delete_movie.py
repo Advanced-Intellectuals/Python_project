@@ -1,34 +1,39 @@
 import streamlit as st
+import requests
 
 def main():
+    API_URL_LOGOUT = "http://127.0.0.1:8000/logout"
+    API_URL_SEARCH = "http://127.0.0.1:8000/search"
+    API_URL_DELETE = "http://127.0.0.1:8000/delete_movie"
+
     title_column, exit_button_column = st.columns([6,1])
 
     with title_column:
         st.title("Удаление фильма")
     with exit_button_column:
         if st.button("ВЫХОД"):
-            st.session_state['logged'] = 0
-            st.rerun()
-
-    name = st.text_input("Название фильма")
-
-    year = st.number_input("Год", min_value=1900, max_value=2100, step=1)
-
-    genres = st.multiselect(
-        "Жанры",
-        options=["Action", "Adventure", "Comedy", "Drama", "Horror", "Sci-Fi", "Thriller", "Romance", "Documentary"],
-        default=["Action"]
-    )
-
-    video_file = st.file_uploader("Загрузка видео", type=["mp4", "mov", "avi"])
-
-    preview_image = st.file_uploader("Загрузка фото", type=["jpg", "jpeg", "png"])
-
-    if st.button("Загрузить"):
-        if name and year and genres and preview_image and video_file:
-            st.write("Хорошо!")
-        else:
-            st.warning("Пожалуйста заполните все поля")
+            try:
+                response = requests.post(API_URL_LOGOUT)
+                if response.status_code == 200:
+                    st.session_state['logged'] = 0
+                    st.rerun()
+                else:
+                    st.error("Неправильные параметры.")
+            except Exception as e:
+                st.error(f"Ошибка подключения: {e}")
+    """
+    search_bar = st.text_input("Введите название фильма:")
+    if (search_bar):
+        try:
+                response = requests.post(API_URL_SEARCH, json={"search_title": search_bar})
+                if response.status_code == 200:
+                        draw_movies(response['movies'], 6, __file__)
+                        st.rerun()
+                else:
+                    st.error("Неправильные параметры.")
+        except Exception as e:
+                st.error(f"Ошибка подключения: {e}")
+    """
 
 if __name__ == "__main__":
     main()
