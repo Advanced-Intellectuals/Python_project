@@ -51,13 +51,13 @@ async def initialize_system():
     logger.info("Data update scheduler started.")
 
 
-# @app.on_event("startup")
-# async def startup_event():
-#     """
-#     Выполняется при запуске приложения.
-#     """
-#     FastAPICache.init(InMemoryBackend())
-#     await initialize_system()
+@app.on_event("startup")
+async def startup_event():
+    """
+    Выполняется при запуске приложения.
+    """
+    FastAPICache.init(InMemoryBackend())
+    await initialize_system()
 
 
 @app.on_event("shutdown")

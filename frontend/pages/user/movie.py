@@ -52,8 +52,9 @@ def movie(movie_id):
             API_URL_RECS, json={'movie_id': movie_id})
         if response.status_code == 200:
             body = response.json()
-            draw_movies(body['movies'], 5, __file__)
+            draw_movies(body, 5, __file__)
         else:
             st.error("Ошибка запроса.")
+            st.error(response.json())
     except Exception as e:
         st.error(f"Ошибка подключения: {e}")
