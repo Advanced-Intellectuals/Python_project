@@ -23,5 +23,5 @@ RUN mkdir -p /app/cert && \
 ENTRYPOINT [ "streamlit", "run", "frontend/main.py",\ 
     "--server.port=443", \
     "--server.headless=true", \
-    "--server.sslCertFile=${CERT_PATH}", \
-    "--server.sslKeyFile=${KEY_PATH}}" ]
+    "--server.sslCertFile=$CERT_PATH", \
+    "--server.sslKeyFile=$KEY_PATH" ]
