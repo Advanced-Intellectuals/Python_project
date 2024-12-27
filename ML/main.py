@@ -142,4 +142,5 @@ async def help():
     }
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8001, ssl=ssl_context)
+    uvicorn.run(app, host='0.0.0.0', port=8001,
+                ssl_certfile=os.getenv("CERT_PATH"), ssl_keyfile=os.getenv("KEY_PATH"))
