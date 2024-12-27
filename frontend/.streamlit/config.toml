@@ -1,3 +1,0 @@
-[server]
-sslCertFile = '/app/cert/fullchain.pem'
-sslKeyFile = '/app/cert/private.key'
