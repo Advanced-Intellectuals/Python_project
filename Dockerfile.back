@@ -11,7 +11,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY ./backend/ /app/backend/
 
 ENV CERT_PATH=/app/cert/fullchain.pem
-ENV KEY_PATH =/app/cert/private.key
+ENV KEY_PATH=/app/cert/private.key
 
 ARG SSL_CERT
 ARG SSL_KEY
