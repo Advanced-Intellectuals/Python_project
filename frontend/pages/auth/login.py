@@ -11,7 +11,16 @@ def login():
                       "user_password": st.session_state.password}
             )
             if response.status_code == 200:
-                st.session_state['logged'] = 1
+                response2 = st.session_state.session.get(
+                    st.session_state.api_url)
+                if response2.status_code == 200:
+                    body = response2.json()
+                    if body['role'] == 'user':
+                        st.session_state['logged'] = 1
+                    elif body['role'] == 'admin':
+                        st.session_state['logged'] = 2
+                else:
+                    st.error("Не удалось получить роль")
             else:
                 st.error("Неправильный логин или пароль.")
         except Exception as e:

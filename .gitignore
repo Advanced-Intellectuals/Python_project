@@ -8,3 +8,4 @@ test.json
 .coverage
 preprocessed_data.pkl
 .streamlit
+tmp
