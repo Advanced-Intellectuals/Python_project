@@ -126,11 +126,18 @@ class Simple_Recommender:
 
             # Sort movies by weighted average ratings
             unrated_ratings = average_neighbor_ratings[unrated_movies]
-            recommended_movie_indices = unrated_movies[np.argsort(-unrated_ratings)]
+            # Сортируем индексы фильмов в соответствии с их рейтингами (по убыванию)
+            sorted_indices = np.argsort(unrated_ratings)[::-1]
+            recommended_movie_indices = unrated_movies[sorted_indices]
             recommended_movies = [self.data.index_movie[idx].item() for idx in recommended_movie_indices[:films]]
 
-            return recommended_movies
+            if films > len(recommended_movies): films = len(recommended_movies) - 1
 
+            return recommended_movies[:films]
+
+        except ValueError as e:
+            print(f"ValueError in 'get_user_recommendations': {e}")
+            return []
         except Exception as e:
             print(f"Unexpected error in 'get_user_recommendations': {e}")
             return []
@@ -144,15 +151,14 @@ class Simple_Recommender:
                 print(f"Error: Movie with ID '{movie_id}' not found.")
                 return []
 
-            # Используем косинусное сходство для поиска похожих фильмов
-            movie_similarity_scores = cosine_similarity(
-                self.data.user_item_matrix.T, 
-                self.data.user_item_matrix.T[movie_index]
-            )
+        try:
+            # Use cosine similarity to find similar movies
+            movie_similarity_scores = cosine_similarity(self.data.user_item_matrix.T, self.data.user_item_matrix.T[movie_index])
             movie_similarity_scores[movie_index] = -2
 
-            k = min(k, len(self.data.movie_mapper) - 1)
-            similar_movies_indices = movie_similarity_scores.flatten().argsort()[::-1][:k]
+            if k > len(self.data.movie_mapper): k = len(self.data.movie_mapper) - 1
+
+            similar_movies_indices = (movie_similarity_scores.flatten().argsort()[::-1])[:k]
             recommended_movies = [self.data.index_movie[i].item() for i in similar_movies_indices]
 
             return recommended_movies
