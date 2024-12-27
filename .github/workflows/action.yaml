@@ -21,17 +21,23 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Build Docker image
+        env:
+          SSL_CERT: ${{ secrets.SSL_CERT }}
+          SSL_KEY: ${{ secrets.SSL_KEY }}
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
         run: |
           docker build \
-            --build-arg SSL_CERT=${{ secrets.SSL_CERT }} \
-            --build-arg SSL_KEY=${{ secrets.SSL_KEY }} \
+            --build-arg SSL_CERT=${SSL_CERT} \
+            --build-arg SSL_KEY=${SSL_KEY} \
             -f Dockerfile.back \
-            -t ${{ secrets.DOCKER_USERNAME }}/cinema-backend \
+            -t ${DOCKER_USERNAME}/cinema-backend \
             .
       
       - name: Push Docker image
+        env:
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
         run: |
-          docker push ${{ secrets.DOCKER_USERNAME }}/cinema-backend
+          docker push ${DOCKER_USERNAME}/cinema-backend
 
     
   build-and-push-frontend:
@@ -49,17 +55,23 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Build Docker image
+        env:
+          SSL_CERT: ${{ secrets.SSL_CERT }}
+          SSL_KEY: ${{ secrets.SSL_KEY }}
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
         run: |
           docker build \
-            --build-arg SSL_CERT=${{ secrets.SSL_CERT }} \
-            --build-arg SSL_KEY=${{ secrets.SSL_KEY }} \
+            --build-arg SSL_CERT=${SSL_CERT} \
+            --build-arg SSL_KEY=${SSL_KEY} \
             -f Dockerfile.front \
-            -t ${{ secrets.DOCKER_USERNAME }}/cinema-frontend \
+            -t ${DOCKER_USERNAME}/cinema-frontend \
             .
       
       - name: Push Docker image
+        env:
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
         run: |
-          docker push ${{ secrets.DOCKER_USERNAME }}/cinema-frontend
+          docker push ${DOCKER_USERNAME}/cinema-frontend
   
 
   build-and-push-ml:
@@ -77,17 +89,23 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Build Docker image
+        env:
+          SSL_CERT: ${{ secrets.SSL_CERT }}
+          SSL_KEY: ${{ secrets.SSL_KEY }}
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
         run: |
           docker build \
-            --build-arg SSL_CERT=${{ secrets.SSL_CERT }} \
-            --build-arg SSL_KEY=${{ secrets.SSL_KEY }} \
+            --build-arg SSL_CERT=${SSL_CERT} \
+            --build-arg SSL_KEY=${SSL_KEY} \
             -f Dockerfile.ml \
-            -t ${{ secrets.DOCKER_USERNAME }}/cinema-ml \
+            -t ${DOCKER_USERNAME}/cinema-ml \
             .
       
       - name: Push Docker image
+        env:
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
         run: |
-          docker push ${{ secrets.DOCKER_USERNAME }}/cinema-ml
+          docker push ${DOCKER_USERNAME}/cinema-ml
 
 
   deploy-to-server:
@@ -104,9 +122,12 @@ jobs:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
       - name: SSH into server and deploy using Docker Compose
+        env:
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD}}
         run: |
           ssh -o StrictHostKeyChecking=no -p 2225 tim@185.105.91.138 "
             cd Movies &&
-            docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD}} &&
+            docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD} &&
             docker-compose pull &&
             docker-compose up -d --build"
