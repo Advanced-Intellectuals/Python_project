@@ -146,7 +146,16 @@ class App():
                 api_response.raise_for_status()
                 recommendations = api_response.json()
 
-                recommend_movies = await movie_service.recommend_movies(recommendations["recommendations"])
+                print(recommendations)
+
+                if recommendations["recommendations"] == []:
+                    response.status_code = 204
+                    return
+
+                try:
+                    recommend_movies = await movie_service.recommend_movies(recommendations["recommendations"])
+                except Exception as e:
+                    raise HTTPException(status_code=403)
 
                 return recommend_movies
             except requests.RequestException as e:
