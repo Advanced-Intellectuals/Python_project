@@ -27,8 +27,8 @@ jobs:
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
         run: |
           docker build \
-            --build-arg SSL_CERT=${SSL_CERT} \
-            --build-arg SSL_KEY=${SSL_KEY} \
+            --build-arg SSL_CERT="${SSL_CERT}" \
+            --build-arg SSL_KEY="${SSL_KEY}" \
             -f Dockerfile.back \
             -t ${DOCKER_USERNAME}/cinema-backend \
             .
@@ -61,8 +61,8 @@ jobs:
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
         run: |
           docker build \
-            --build-arg SSL_CERT=${SSL_CERT} \
-            --build-arg SSL_KEY=${SSL_KEY} \
+            --build-arg SSL_CERT="${SSL_CERT}" \
+            --build-arg SSL_KEY="${SSL_KEY}" \
             -f Dockerfile.front \
             -t ${DOCKER_USERNAME}/cinema-frontend \
             .
@@ -95,8 +95,8 @@ jobs:
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
         run: |
           docker build \
-            --build-arg SSL_CERT=${SSL_CERT} \
-            --build-arg SSL_KEY=${SSL_KEY} \
+            --build-arg SSL_CERT="${SSL_CERT}" \
+            --build-arg SSL_KEY="${SSL_KEY}" \
             -f Dockerfile.ml \
             -t ${DOCKER_USERNAME}/cinema-ml \
             .
