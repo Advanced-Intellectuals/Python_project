@@ -20,8 +20,4 @@ RUN mkdir -p /app/cert && \
     echo "$SSL_KEY" > /app/cert/private.key && \
     echo "$SSL_CERT" > /app/cert/fullchain.pem
 
-ENTRYPOINT [ "streamlit", "run", "frontend/main.py",\ 
-    "--server.port=443", \
-    "--server.headless=true", \
-    "--server.sslCertFile=$CERT_PATH", \
-    "--server.sslKeyFile=$KEY_PATH" ]
+ENTRYPOINT streamlit run frontend/main.py --server.port=443 --server.headless=true --server.sslCertFile=$CERT_PATH --server.sslKeyFile=$KEY_PATH
