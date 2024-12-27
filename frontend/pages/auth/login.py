@@ -1,32 +1,39 @@
 import streamlit as st
-import requests
+import os
+
+
+def login():
+    if st.session_state.username and st.session_state.password:
+        try:
+            response = st.session_state.session.post(
+                st.session_state.api_url,
+                json={"user_login": st.session_state.username,
+                      "user_password": st.session_state.password}
+            )
+            if response.status_code == 200:
+                st.session_state['logged'] = 1
+            else:
+                st.error("Неправильный логин или пароль.")
+        except Exception as e:
+            st.error(f"Ошибка подключения: {e}")
+    else:
+        st.warning("Пожалуйста введите логин и пароль.")
+
+
+def reg():
+    st.session_state['auth_page'] = 'register'
+
 
 def main():
-    API_URL = "http://127.0.0.1:8000/login"
+    API_URL = f"{os.getenv('BACK_URL')}/login"
 
     st.title("Авторизация")
 
-    username = st.text_input("Логин", placeholder="Введите логин")
-    password = st.text_input("Пароль", placeholder="Введите пароль", type="password")
+    st.session_state.username = st.text_input(
+        "Логин", placeholder="Введите логин")
+    st.session_state.password = st.text_input(
+        "Пароль", placeholder="Введите пароль", type="password")
 
-    if st.button("Войти"):
-        if username and password:
-            try:
-                response = requests.post(API_URL, json={"user_login": username, "user_password": password})
-                if response.status_code == 200:
-                    st.success("Вы совершили вход!")
-                    st.session_state['logged'] = 1
-                    st.rerun()
-                else:
-                    st.error("Неправильный логин или пароль.")
-            except Exception as e:
-                st.error(f"Ошибка подключения: {e}")
-        else:
-            st.warning("Пожалуйста введите логин и пароль.")
-    
-    if st.button("Ещё нет аккаунта?"):
-        st.session_state['auth_page'] = 'register'
-        st.rerun()
+    st.button("Войти", on_click=login)
 
-if __name__ == "__main__":
-    main()
+    st.button("Ещё нет аккаунта?", on_click=reg)

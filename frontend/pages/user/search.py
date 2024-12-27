@@ -1,20 +1,13 @@
 import streamlit as st
-import requests
+import os
 from util import draw_movies
 
 
-def main():
-    API_URL = "http://127.0.0.1:8000/search"
-
-    search_bar_column, search_button_column = st.columns(
-        [4, 1], vertical_alignment="bottom")
-
-    with search_bar_column:
-        search_bar = st.text_input("Введите название фильма:")
-    if (search_bar):
+def find():
+    if (st.session_state.search_bar):
         try:
-            response = requests.get(
-                API_URL, json={"searched_title": search_bar})
+            response = st.session_state.session.get(
+                st.session_state.search_url, json={"searched_title": st.session_state.search_bar})
             if response.status_code == 200:
                 body = response.json()
                 draw_movies(body['movies'], 6, __file__)
@@ -24,5 +17,13 @@ def main():
             st.error(f"Ошибка подключения: {e}")
 
 
-if __name__ == "__main__":
-    main()
+def main():
+    st.session_state.search_url = f"{os.getenv('BACK_URL')}/search"
+
+    search_bar_column, search_button_column = st.columns(
+        [4, 1], vertical_alignment="bottom")
+
+    with search_bar_column:
+        st.session_state.search_bar = st.text_input("Введите название фильма:")
+    with search_button_column:
+        st.button('Найти', on_click=find)

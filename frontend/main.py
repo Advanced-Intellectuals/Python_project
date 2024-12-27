@@ -2,6 +2,12 @@ import streamlit as st
 from pages.user import movies, recommendations, watched, search, movie
 from pages.auth import login, register
 from pages.admin import add_movie, delete_movie
+import requests
+import os
+from dotenv import load_dotenv
+from minio_server import MinioServer
+
+load_dotenv()
 
 st.set_page_config(layout="wide")
 
@@ -31,6 +37,15 @@ if 'movie_page' not in st.session_state:
 
 if 'previous_page' not in st.session_state:
     st.session_state['previous_page'] = list(USER_TABLE.keys())[0]
+
+if 'session' not in st.session_state:
+    st.session_state['session'] = requests.Session()
+
+if 'api_url' not in st.session_state:
+    st.session_state['api_url'] = f"{os.getenv('BACK_URL')}/login"
+
+if 'minio_server' not in st.session_state:
+    st.session_state['minio_server'] = MinioServer()
 
 
 def main():

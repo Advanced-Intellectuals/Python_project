@@ -1,6 +1,6 @@
 import streamlit as st
-import requests
 from util import draw_movies
+import os
 
 
 def go_to_previous_page():
@@ -13,7 +13,7 @@ def go_to_next_page():
 
 
 def main():
-    API_URL = "http://127.0.0.1:8000/movies"
+    API_URL = f"{os.getenv('BACK_URL')}/movies"
 
     movie_grid, params = st.columns([5, 1])
 
@@ -30,19 +30,22 @@ def main():
         with date2:
             number2 = st.number_input("ДО:", value=2024, step=1)
 
-        options = ["Option 1", "Option 2", "Option 3"]
+        options = ['Adventure', 'Animation', 'Children', 'Comedy', 'Fantasy', 'Romance', 'Drama',
+                   'Action', 'Crime', 'Thriller', 'Horror', 'Mystery', 'Sci-Fi', 'War', 'Musical',
+                   'Documentary', 'IMAX', 'Western', 'Film-Noir']
+
         selected_options = st.multiselect("Жанры:", options)
 
     if number1 and number2:
         with movie_grid:
             try:
-                response = requests.get(API_URL, json={"page_number": st.session_state['movie_page'],
-                                                       "start_year": number1,
-                                                       "end_year": number2,
-                                                       "genres": selected_options})
+                response = st.session_state.session.get(API_URL, json={"page_number": st.session_state['movie_page'],
+                                                                       "start_year": number1,
+                                                                       "end_year": number2,
+                                                                       "genres": selected_options})
                 if response.status_code == 200:
                     body = response.json()
-                    draw_movies(body['movies'], 6, __file__)
+                    draw_movies(body['movies'], 5, __file__)
                 else:
                     st.error("Неправильные параметры.")
             except Exception as e:

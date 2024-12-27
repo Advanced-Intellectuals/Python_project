@@ -69,11 +69,13 @@ class App():
                     samesite='Lax'  # Ограничение межсайтовых запросов
                 )
             else:
-                raise HTTPException(status_code=401, detail="Invalid password.")
+                raise HTTPException(
+                    status_code=401, detail="Invalid password.")
 
         @self.__app.get("/login")
         async def login(request: Request, response: Response):
-            session_cookie = request.cookies.get("session")  # Извлекаем куку из запроса
+            session_cookie = request.cookies.get(
+                "session")  # Извлекаем куку из запроса
             print(f"Received cookie: {session_cookie}")
 
             if not session_cookie:
@@ -88,7 +90,8 @@ class App():
                     status_code=401, detail="Invalid or expired session."
                 )
 
-            return {"user_id": user_data["user_id"], "role": user_data["role"]}  # Возвращаем user_id и role в ответе
+            # Возвращаем user_id и role в ответе
+            return {"user_id": user_data["user_id"], "role": user_data["role"]}
 
         @self.__app.post("/register")
         async def register(request: Request, response: Response, data: RegisterRequest):
@@ -115,7 +118,8 @@ class App():
                     samesite='Lax'  # Ограничение межсайтовых запросов
                 )
             else:
-                raise HTTPException(status_code=401, detail="Invalid password.")
+                raise HTTPException(
+                    status_code=401, detail="Invalid password.")
 
         @self.__app.get("/recommendations")
         async def recommendations(request: Request, response: Response):
@@ -123,11 +127,14 @@ class App():
             session_cookie = request.cookies.get("session")
 
             if not session_cookie:
-                raise HTTPException(status_code=401, detail="No session cookie found.")
+                raise HTTPException(
+                    status_code=401, detail="No session cookie found.")
 
-            user_data = self.__serializer.get_user_data_from_session(session_cookie)
+            user_data = self.__serializer.get_user_data_from_session(
+                session_cookie)
             if user_data is None:
-                raise HTTPException(status_code=401, detail="Invalid or expired session.")
+                raise HTTPException(
+                    status_code=401, detail="Invalid or expired session.")
 
             user_id = user_data["user_id"]
 
@@ -192,11 +199,14 @@ class App():
             session_cookie = request.cookies.get("session")
 
             if not session_cookie:
-                raise HTTPException(status_code=401, detail="No session cookie found.")
+                raise HTTPException(
+                    status_code=401, detail="No session cookie found.")
 
-            user_data = self.__serializer.get_user_data_from_session(session_cookie)
+            user_data = self.__serializer.get_user_data_from_session(
+                session_cookie)
             if user_data is None:
-                raise HTTPException(status_code=401, detail="Invalid or expired session.")
+                raise HTTPException(
+                    status_code=401, detail="Invalid or expired session.")
 
             user_id = user_data["user_id"]
 
@@ -273,7 +283,8 @@ class App():
                 response.status_code = 200
                 return {"message": "Movie successfully deleted"}
             except Exception as e:
-                raise HTTPException(status_code=400, detail="Bad request: Invalid movie ID")
+                raise HTTPException(
+                    status_code=400, detail="Bad request: Invalid movie ID")
 
         @self.__app.post("/add_score")
         async def add_score(request: Request, response: Response, data: ScoreRequest):
@@ -281,11 +292,14 @@ class App():
             session_cookie = request.cookies.get("session")
 
             if not session_cookie:
-                raise HTTPException(status_code=401, detail="No session cookie found.")
+                raise HTTPException(
+                    status_code=401, detail="No session cookie found.")
 
-            user_data = self.__serializer.get_user_data_from_session(session_cookie)
+            user_data = self.__serializer.get_user_data_from_session(
+                session_cookie)
             if user_data is None:
-                raise HTTPException(status_code=401, detail="Invalid or expired session.")
+                raise HTTPException(
+                    status_code=401, detail="Invalid or expired session.")
 
             user_id = user_data["user_id"]
             movie_id = data.movie_id
