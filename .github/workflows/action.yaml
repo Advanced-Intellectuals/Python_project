@@ -39,6 +39,9 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
+
+      - name: Check secrets (debug)
+        run: echo "Docker username: ${{ secrets.DOCKER_USERNAME }}"
       
       - name: Log in to Docker Hub
         uses: docker/login-action@v2
@@ -89,6 +92,7 @@ jobs:
 
   deploy-to-server:
     runs-on: ubuntu-latest
+    needs: [build-and-push-frontend, build-and-push-backend, build-and-push-ml]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
