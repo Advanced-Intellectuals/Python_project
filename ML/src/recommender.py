@@ -151,7 +151,6 @@ class Simple_Recommender:
                 print(f"Error: Movie with ID '{movie_id}' not found.")
                 return []
 
-        try:
             # Use cosine similarity to find similar movies
             movie_similarity_scores = cosine_similarity(self.data.user_item_matrix.T, self.data.user_item_matrix.T[movie_index])
             movie_similarity_scores[movie_index] = -2

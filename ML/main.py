@@ -5,6 +5,7 @@ from fastapi_cache.decorator import cache
 from src.read_data import SimpleCompactData
 from src.recommender import Simple_Recommender
 from src.scheduler import DataUpdateScheduler
+from src.repository import Repository
 import uvicorn
 import logging
 import os
