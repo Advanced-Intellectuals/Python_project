@@ -241,9 +241,20 @@ class App():
             return {"movies": movies}
 
         @self.__app.get("/watched")
-        async def watched(request: Request, response: Response, data: UserRequest):
+        async def watched(request: Request, response: Response):
+            session_cookie = request.cookies.get("session")
 
-            user_id = data.user_id
+            if not session_cookie:
+                raise HTTPException(
+                    status_code=401, detail="No session cookie found.")
+
+            user_data = self.__serializer.get_user_data_from_session(
+                session_cookie)
+            if user_data is None:
+                raise HTTPException(
+                    status_code=401, detail="Invalid or expired session.")
+
+            user_id = user_data["user_id"]
 
             try:
                 movies = await user_service.watched(user_id)
