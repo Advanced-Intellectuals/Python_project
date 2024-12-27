@@ -98,8 +98,12 @@ class Simple_Recommender:
                 recommended_movies = movie_popularity.index.tolist()
                 return recommended_movies[:films]
 
-            # Get user ratings
+            # Получаем рейтинги пользователя
             user_ratings = self.get_user_ratings(user_id)
+            if user_ratings is None:
+                movie_popularity = self.data.df.groupby('movieId')['rating'].mean().sort_values(ascending=False)
+                recommended_movies = movie_popularity.index.tolist()
+                return recommended_movies[:films]
 
             # Find nearest neighbors
             nearest_neighbors, similarity_scores = self.get_k_nearest_neighbors(user_id, neighbours, user_ratings)
@@ -122,36 +126,33 @@ class Simple_Recommender:
 
             # Sort movies by weighted average ratings
             unrated_ratings = average_neighbor_ratings[unrated_movies]
-            recommended_movie_indices = np.argsort(-unrated_ratings)  # Descending order
-            recommended_movies = [self.data.index_movie[idx].item() for idx in recommended_movie_indices]
+            recommended_movie_indices = unrated_movies[np.argsort(-unrated_ratings)]
+            recommended_movies = [self.data.index_movie[idx].item() for idx in recommended_movie_indices[:films]]
 
-            if films > len(recommended_movies): films = len(recommended_movies)
+            return recommended_movies
 
-            return recommended_movies[:films]
-
-        except ValueError as e:
-            print(f"ValueError in 'get_user_recommendations': {e}")
-            return []
         except Exception as e:
             print(f"Unexpected error in 'get_user_recommendations': {e}")
             return []
 
-    def get_movie_recommendations(self, movie_title, k=5):
-        """Recommends similar movies based on movie title."""
+    def get_movie_recommendations(self, movie_id, k=5):
+        """Рекомендует похожие фильмы на основе ID фильма."""
         try:
-            movie_index = self.data.movie_mapper[movie_title]
-        except KeyError:
-            print(f"Error: Movie '{movie_title}' not found.")
-            return []
+            # Получаем индекс фильма из маппера
+            movie_index = self.data.movie_mapper.get(movie_id)
+            if movie_index is None:
+                print(f"Error: Movie with ID '{movie_id}' not found.")
+                return []
 
-        try:
-            # Use cosine similarity to find similar movies
-            movie_similarity_scores = cosine_similarity(self.data.user_item_matrix.T, self.data.user_item_matrix.T[movie_index])
+            # Используем косинусное сходство для поиска похожих фильмов
+            movie_similarity_scores = cosine_similarity(
+                self.data.user_item_matrix.T, 
+                self.data.user_item_matrix.T[movie_index]
+            )
             movie_similarity_scores[movie_index] = -2
 
-            if k > len(self.data.movie_mapper): k = len(self.data.movie_mapper) - 1
-
-            similar_movies_indices = (movie_similarity_scores.flatten().argsort()[::-1])[:k]
+            k = min(k, len(self.data.movie_mapper) - 1)
+            similar_movies_indices = movie_similarity_scores.flatten().argsort()[::-1][:k]
             recommended_movies = [self.data.index_movie[i].item() for i in similar_movies_indices]
 
             return recommended_movies
