@@ -132,13 +132,12 @@ class AddMovieRequest(BaseModel):
 
 class UserRequest(BaseModel):
     user_id: int
-<<<<<<< HEAD:src/models.py
-=======
+
 
 class MovieRequest(BaseModel):
     movie_id: int
 
+
 class ScoreRequest(BaseModel):
     movie_id: int
     score: int
->>>>>>> develop:backend/models.py
